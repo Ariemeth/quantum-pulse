@@ -34,6 +34,11 @@ func main() {
 		panic(err)
 	}
 	window.MakeContextCurrent()
+	window.SetKeyCallback(onKey)
+	window.SetMouseButtonCallback(onMouseButton)
+	window.SetCloseCallback(onClose)
+	window.SetScrollCallback(onScroll)
+	window.SetCursorPosCallback(onCursorPos)
 
 	// Initialize Glow
 	if err := gl.Init(); err != nil {
@@ -42,7 +47,7 @@ func main() {
 
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	fmt.Println("OpenGL version", version)
-	
+
 	// Configure global settings
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
@@ -59,5 +64,43 @@ func main() {
 		window.SwapBuffers()
 		glfw.PollEvents()
 	}
+
+}
+
+func onKey(window *glfw.Window, k glfw.Key, s int, action glfw.Action, mods glfw.ModifierKey) {
+	if action != glfw.Press {
+		return
+	}
+
+	switch glfw.Key(k) {
+	case glfw.KeyEscape:
+		window.SetShouldClose(true)
+	default:
+		return
+	}
+}
+
+func onMouseButton(window *glfw.Window, b glfw.MouseButton, action glfw.Action, mods glfw.ModifierKey) {
+	if action != glfw.Press {
+		return
+	}
+
+	switch glfw.MouseButton(b) {
+	case glfw.MouseButtonLeft:
+		return
+	default:
+		return
+	}
+}
+
+func onClose(window *glfw.Window) {
+	window.SetShouldClose(true)
+}
+
+func onScroll(window *glfw.Window, xoff float64, yoff float64) {
+
+}
+
+func onCursorPos(window *glfw.Window, xpos float64, ypos float64) {
 
 }
