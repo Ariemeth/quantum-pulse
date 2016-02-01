@@ -1,0 +1,6 @@
+language: go
+go:
+  - 1.5.2
+script:
+  - go get -t -v github.com/go-gl/gl/v4.1-core/gl
+  - go get -t -v github.com/go-gl/glfw/v3.1/glfw
