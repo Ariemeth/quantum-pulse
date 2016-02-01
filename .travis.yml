@@ -1,6 +1,17 @@
 language: go
+sudo: false
 go:
   - 1.5.2
+  - tip
+env: GOMAXPROCS=2
+addons:
+  apt:
+    packages:
+      - libgl1-mesa-dev
+      - xorg-dev
+install:
+  - go get golang.org/x/tools/cmd/vet
 script:
-  - go get -t -v github.com/go-gl/gl/v4.1-core/gl
-  - go get -t -v github.com/go-gl/glfw/v3.1/glfw
+  - go get -t -v ./...
+  - go tool vet .
+  - go test -v 
