@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/draw"
 	_ "image/png"
+	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
@@ -32,13 +33,23 @@ func main() {
 	window := createWindow()
 
 	initGL()
-	
+
 	// Configure the vertex and fragment shaders
-	program, err := newProgram(basicVertexShader, basicFragmentShader)
+	simpleVert, err := loadShader("shaders/simple.vert")
 	if err != nil {
 		panic(err)
 	}
 	
+	simpleFrag, err := loadShader("shaders/simple.frag")
+	if err != nil {
+		panic(err)
+	}
+	
+	program, err := newProgram(simpleVert, simpleFrag)
+	if err != nil {
+		panic(err)
+	}
+
 	gl.UseProgram(program)
 
 	for !window.ShouldClose() {
@@ -231,34 +242,12 @@ func newTexture(file string) (uint32, error) {
 	return texture, nil
 }
 
-var basicVertexShader = `
-#version 330
+func loadShader(fileName string) (string, error) {
+	data, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return "", err
+	}
 
-uniform mat4 projection;
-uniform mat4 camera;
-uniform mat4 model;
-
-in vec3 vert;
-in vec2 vertTexCoord;
-
-out vec2 fragTexCoord;
-
-void main() {
-    fragTexCoord = vertTexCoord;
-    gl_Position = projection * camera * model * vec4(vert, 1);
+	return string(data) + "\x00", nil
 }
-` + "\x00"
 
-var basicFragmentShader = `
-#version 330
-
-uniform sampler2D tex;
-
-in vec2 fragTexCoord;
-
-out vec4 outputColor;
-
-void main() {
-    outputColor = texture(tex, fragTexCoord);
-}
-` + "\x00"
