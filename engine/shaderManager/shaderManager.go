@@ -14,7 +14,7 @@ type ShaderManager struct {
 }
 
 //NewShaderManager creates a new ShaderManager
-func NewShaderManager() *ShaderManager{
+func NewShaderManager() *ShaderManager {
 	sm := ShaderManager{programs: make(map[string]uint32)}
 	return &sm
 }
@@ -32,19 +32,19 @@ func (sm *ShaderManager) LoadProgram(vertexSourceFile, fragmentSourceFile, key s
 		fmt.Println(err)
 		return
 	}
-		
+
 	program, err := newProgram(simpleVert, simpleFrag)
-	if(err != nil){
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	
-	sm.programs[key] = program	
+
+	sm.programs[key] = program
 }
 
-//GetProgram returns a program id if the shader program was loaded, if it was not a 0 
+//GetProgram returns a program id if the shader program was loaded, if it was not a 0
 //false will be returned
-func (sm *ShaderManager) GetProgram(key string) (uint32, bool){
+func (sm *ShaderManager) GetProgram(key string) (uint32, bool) {
 	program, status := sm.programs[key]
 	return program, status
 }
