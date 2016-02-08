@@ -6,13 +6,15 @@ import (
 	"image/draw"
 	_ "image/png"
 	"os"
+	"sync"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 //TextureManager stores opengl textures
 type TextureManager struct {
-	textures map[string]uint32
+	textures    map[string]uint32
+	textureLock sync.RWMutex
 }
 
 //NewTextureManager creates a new TextureManager
@@ -29,13 +31,17 @@ func (tm *TextureManager) LoadTexture(textureFile, key string) {
 		return
 	}
 
+	tm.textureLock.Lock()
 	tm.textures[key] = texture
+	tm.textureLock.Unlock()
 }
 
 //GetTexture returns a texture id if the texture was loaded, if it was not a 0 and
 //false will be returned
 func (tm *TextureManager) GetTexture(key string) (uint32, bool) {
+	tm.textureLock.RLock()
 	texture, status := tm.textures[key]
+	tm.textureLock.RUnlock()
 	return texture, status
 }
 

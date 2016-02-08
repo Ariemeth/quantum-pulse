@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"sync"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
 //ShaderManager stores shader programs
 type ShaderManager struct {
-	programs map[string]uint32
+	programs    map[string]uint32
+	programLock sync.RWMutex
 }
 
 //NewShaderManager creates a new ShaderManager
@@ -39,13 +41,17 @@ func (sm *ShaderManager) LoadProgram(vertexSourceFile, fragmentSourceFile, key s
 		return
 	}
 
+	sm.programLock.Lock()
 	sm.programs[key] = program
+	sm.programLock.Unlock()
 }
 
 //GetProgram returns a program id if the shader program was loaded, if it was not a 0
 //false will be returned
 func (sm *ShaderManager) GetProgram(key string) (uint32, bool) {
+	sm.programLock.RLock()
 	program, status := sm.programs[key]
+	sm.programLock.RUnlock()
 	return program, status
 }
 
