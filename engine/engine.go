@@ -12,12 +12,15 @@ import (
 
 const windowWidth = 800
 const windowHeight = 600
+const defaultVertShaderFile = "shaders/simple.vert"
+const defaultFragShaderFile = "shaders/simple.frag"
+const defaultShaderProgram = "simple"
 
 //Engine constitutes the rendering engine
 type Engine struct {
-	window         *glfw.Window
-	shaders        *sm.ShaderManager
-	textures       *tm.TextureManager
+	window   *glfw.Window
+	shaders  *sm.ShaderManager
+	textures *tm.TextureManager
 }
 
 //Init is called to initialize glfw and opengl
@@ -33,14 +36,14 @@ func (e *Engine) Init() {
 	e.shaders = sm.NewShaderManager()
 	e.textures = tm.NewTextureManager()
 	//Load a default simple shader program
-	e.shaders.LoadProgram("shaders/simple.vert", "shaders/simple.frag", "simple")
+	e.shaders.LoadProgram(defaultVertShaderFile, defaultFragShaderFile, defaultShaderProgram)
 }
 
 //Run is runs the main engine loop
 func (e *Engine) Run() {
 	defer glfw.Terminate()
-	
-	program, isLoaded := e.shaders.GetProgram("simple")
+
+	program, isLoaded := e.shaders.GetProgram(defaultShaderProgram)
 	if isLoaded {
 		gl.UseProgram(program)
 	}
