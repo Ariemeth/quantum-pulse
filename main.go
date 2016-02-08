@@ -2,6 +2,7 @@ package main
 
 import (
 	"runtime"
+	"github.com/Ariemeth/frame-assault-2/engine"
 )
 
 func init() {
@@ -11,7 +12,7 @@ func init() {
 
 func main() {
 
-	engine := new(Engine)
+	engine := new(engine.Engine)
 
 	engine.Init()
 
