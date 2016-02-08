@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 
+	sm "github.com/Ariemeth/frame-assault-2/engine/shaderManager"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 )
@@ -18,6 +19,7 @@ const windowHeight = 600
 //Engine constitutes the rendering engine
 type Engine struct {
 	window         *glfw.Window
+	shaders        *sm.ShaderManager
 	currentProgram uint32
 }
 
@@ -31,20 +33,14 @@ func (e *Engine) Init() {
 
 	initGL()
 
-	simpleVert, err := loadShader("shaders/simple.vert")
-	if err != nil {
-		panic(err)
+	e.shaders = sm.NewShaderManager()
+	e.shaders.LoadProgram("shaders/simple.vert", "shaders/simple.frag", "simple")
+
+	program, isLoaded := e.shaders.GetProgram("simple")
+	if !isLoaded {
+		return
 	}
 
-	simpleFrag, err := loadShader("shaders/simple.frag")
-	if err != nil {
-		panic(err)
-	}
-
-	program, err := newProgram(simpleVert, simpleFrag)
-	if err != nil {
-		panic(err)
-	}
 	e.currentProgram = program
 }
 
