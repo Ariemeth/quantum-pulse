@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
+	//needed to import png images
 	_ "image/png"
 	"os"
 	"sync"
