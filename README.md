@@ -1,1 +1,2 @@
 [![Build Status](https://travis-ci.org/Ariemeth/frame-assault-2.svg?branch=master)](https://travis-ci.org/Ariemeth/frame-assault-2)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ariemeth/frame-assault-2)](https://goreportcard.com/report/github.com/ariemeth/frame-assault-2)
