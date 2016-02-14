@@ -10,6 +10,10 @@ import (
 )
 
 //Shader holds information about a shader program
+//VertSrcFile file that contains the vertex shader
+//FragSrcFile file that contains the fragment shader
+//VertSrc: vertex shader source
+//FragSrc: fragment shader source
 type Shader struct {
 	VertSrcFile string
 	FragSrcFile string
@@ -18,7 +22,7 @@ type Shader struct {
 	Name        string
 }
 
-//ShaderManager stores shader programs
+//shaderManager stores shader programs
 type shaderManager struct {
 	programs      map[string]uint32
 	programLock   sync.RWMutex
@@ -48,6 +52,8 @@ func (sm *shaderManager) LoadProgram(shader Shader, shouldBeDefault bool) {
 			fmt.Println(err)
 			return
 		}
+	} else if !strings.HasSuffix(shader.VertSrc, "\x00") {
+		shader.VertSrc = shader.VertSrc + "\x00"
 	}
 
 	if len(shader.FragSrc) < 1 {
@@ -57,6 +63,8 @@ func (sm *shaderManager) LoadProgram(shader Shader, shouldBeDefault bool) {
 			fmt.Println(err)
 			return
 		}
+	} else if !strings.HasSuffix(shader.FragSrc, "\x00") {
+		shader.FragSrc = shader.FragSrc + "\x00"
 	}
 
 	program, err := newProgram(shader.VertSrc, shader.FragSrc)
