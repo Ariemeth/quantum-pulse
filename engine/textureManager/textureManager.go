@@ -12,20 +12,26 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
-//TextureManager stores opengl textures
-type TextureManager struct {
+//textureManager stores opengl textures
+type textureManager struct {
 	textures    map[string]uint32
 	textureLock sync.RWMutex
 }
 
+//TextureManager interface is used to interact with a textureManager
+type TextureManager interface {
+	LoadTexture(string, string)
+	GetTexture(string) (uint32, bool)
+}
+
 //NewTextureManager creates a new TextureManager
-func NewTextureManager() *TextureManager {
-	tm := TextureManager{textures: make(map[string]uint32)}
+func NewTextureManager() TextureManager {
+	tm := textureManager{textures: make(map[string]uint32)}
 	return &tm
 }
 
 //LoadTexture loads a png file into an opengl texture
-func (tm *TextureManager) LoadTexture(textureFile, key string) {
+func (tm *textureManager) LoadTexture(textureFile, key string) {
 	texture, err := newTexture(textureFile)
 	if err != nil {
 		fmt.Println(err)
@@ -33,16 +39,17 @@ func (tm *TextureManager) LoadTexture(textureFile, key string) {
 	}
 
 	tm.textureLock.Lock()
+	defer tm.textureLock.Unlock()
 	tm.textures[key] = texture
-	tm.textureLock.Unlock()
 }
 
 //GetTexture returns a texture id if the texture was loaded, if it was not a 0 and
 //false will be returned
-func (tm *TextureManager) GetTexture(key string) (uint32, bool) {
+func (tm *textureManager) GetTexture(key string) (uint32, bool) {
 	tm.textureLock.RLock()
+	defer tm.textureLock.RUnlock()
 	texture, status := tm.textures[key]
-	tm.textureLock.RUnlock()
+
 	return texture, status
 }
 
