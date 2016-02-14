@@ -7,8 +7,8 @@ import (
 	sm "github.com/Ariemeth/frame-assault-2/engine/shaderManager"
 )
 
-const vertShaderFile = "shaders/simple.vert"
-const fragShaderFile = "shaders/simple.frag"
+const vertShaderFile = "assets/shaders/simple.vert"
+const fragShaderFile = "assets/shaders/simple.frag"
 const shaderProgram = "simple"
 
 func init() {
