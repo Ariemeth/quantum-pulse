@@ -10,16 +10,12 @@ import (
 )
 
 //Shader holds information about a shader program
-//VertSrcFile file that contains the vertex shader
-//FragSrcFile file that contains the fragment shader
-//VertSrc: vertex shader source
-//FragSrc: fragment shader source
 type Shader struct {
-	VertSrcFile string
-	FragSrcFile string
-	VertSrc     string
-	FragSrc     string
-	Name        string
+	VertSrcFile string //file that contains the vertex shader
+	FragSrcFile string //file that contains the fragment shader
+	VertSrc     string //vertex shader source
+	FragSrc     string //vertex shader source
+	Name        string //shader name
 }
 
 //shaderManager stores shader programs
