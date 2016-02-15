@@ -43,7 +43,7 @@ func (e *Engine) Init() {
 func (e *Engine) Run() {
 	defer glfw.Terminate()
 	e.cube = NewModel("cube", e.shaders, e.textures, "simple")
-	//e.cube.Load()
+	e.cube.Load()
 
 	program, isLoaded := e.shaders.GetShader(e.shaders.GetDefaultShader())
 	if isLoaded {
@@ -51,7 +51,6 @@ func (e *Engine) Run() {
 	} else {
 		fmt.Println("Unable to load default shader")
 	}
-	e.cube.Test()
 
 	previousTime := glfw.GetTime()
 
@@ -63,11 +62,10 @@ func (e *Engine) Run() {
 		elapsed := time - previousTime
 		previousTime = time
 
-		e.cube.Test2(elapsed)
-		//		e.cube.Update(elapsed)
+		e.cube.Update(elapsed)
 
 		// Render
-		//		e.cube.Render()
+		e.cube.Render()
 
 		// Maintenance
 		e.window.SwapBuffers()

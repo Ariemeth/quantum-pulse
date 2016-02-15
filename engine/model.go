@@ -9,7 +9,7 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-//model represents a physical entity
+//Model represents a physical entity
 type Model struct {
 	Entity
 	vertices          []float32
@@ -28,29 +28,19 @@ type Model struct {
 	currentTexture    uint32
 }
 
-/*
-//Model represents the behavior of a physical entity
-type Model interface {
-	Renderable
-	Load()
-	Compare()
-}
-*/
-func (m *Model) Compare() {
-	fmt.Println(m)
-}
-
 //NewModel creates a new model
 func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, shader string) *Model {
-	m := Model{Entity: NewEntity(id)}
-	m.model = mgl32.Ident4()
-	m.camera = mgl32.Ident4()
-	m.projection = mgl32.Ident4()
-	m.shaders = shaders
-	m.textures = textures
-	m.angle = 0.0
+	m := Model{
+		Entity:     NewEntity(id),
+		shaders:    shaders,
+		textures:   textures,
+		angle:      0.0,
+		model:      mgl32.Ident4(),
+		camera:     mgl32.Ident4(),
+		projection: mgl32.Ident4(),
+	}
 
-	program, status := shaders.GetShader(shader) //look into checking status
+	program, status := shaders.GetShader(shader)
 	if status {
 		m.currentProgram = program
 	} else {
@@ -59,8 +49,35 @@ func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, s
 	return &m
 }
 
-func (m *Model) Test() {
+//Update updates the model
+func (m *Model) Update(elapsed float64) {
+	m.angle += elapsed
+	m.model = mgl32.HomogRotate3D(float32(m.angle), mgl32.Vec3{0, 1, 0})
+}
 
+//Render renders the model
+func (m *Model) Render() {
+
+	gl.UseProgram(m.currentProgram)
+	gl.UniformMatrix4fv(m.modelUniform, 1, false, &m.model[0])
+
+	gl.BindVertexArray(m.vao)
+
+	gl.ActiveTexture(gl.TEXTURE0)
+
+	texture, isLoaded := m.textures.GetTexture("square")
+
+	if isLoaded {
+		gl.BindTexture(gl.TEXTURE_2D, texture)
+	} else {
+		fmt.Println("Unable to load texture")
+	}
+
+	gl.DrawArrays(gl.TRIANGLES, 0, 6*2*3)
+
+}
+
+func (m *Model) Load() {
 	program, isLoaded := m.shaders.GetShader(m.shaders.GetDefaultShader())
 	if isLoaded {
 		gl.UseProgram(program)
@@ -111,98 +128,6 @@ func (m *Model) Test() {
 	m.vao = vao
 	m.model = model
 	m.modelUniform = modelUniform
-}
-
-func (m *Model) Test2(elapsed float64) {
-
-	m.angle += elapsed
-	m.model = mgl32.HomogRotate3D(float32(m.angle), mgl32.Vec3{0, 1, 0})
-
-	gl.UseProgram(m.currentProgram)
-	gl.UniformMatrix4fv(m.modelUniform, 1, false, &m.model[0])
-
-	gl.BindVertexArray(m.vao)
-
-	gl.ActiveTexture(gl.TEXTURE0)
-
-	texture, isLoaded := m.textures.GetTexture("square")
-
-	if isLoaded {
-		gl.BindTexture(gl.TEXTURE_2D, texture)
-	} else {
-		fmt.Println("Unable to load texture")
-	}
-
-	gl.DrawArrays(gl.TRIANGLES, 0, 6*2*3)
-}
-
-//Update updates the model
-func (m *Model) Update(elapsed float64) {
-	m.angle += elapsed
-	m.model = mgl32.HomogRotate3D(float32(m.angle), mgl32.Vec3{0, 1, 0})
-}
-
-//Render renders the model
-func (m *Model) Render() {
-
-	gl.UseProgram(m.currentProgram)
-	gl.UniformMatrix4fv(m.modelUniform, 1, false, &m.model[0])
-
-	gl.BindVertexArray(m.vao)
-
-	gl.ActiveTexture(gl.TEXTURE0)
-
-	gl.BindTexture(gl.TEXTURE_2D, m.currentTexture)
-
-	gl.DrawArrays(gl.TRIANGLES, 0, 6*2*3)
-
-}
-
-func (m *Model) Load() {
-	m.vertices = cubeVertices
-
-	m.projection = mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
-	m.projectionUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("projection\x00"))
-	gl.UniformMatrix4fv(m.projectionUniform, 1, false, &m.projection[0])
-
-	m.camera = mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	m.cameraUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("camera\x00"))
-	gl.UniformMatrix4fv(m.cameraUniform, 1, false, &m.camera[0])
-
-	m.model = mgl32.Ident4()
-	m.modelUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("model\x00"))
-	gl.UniformMatrix4fv(m.modelUniform, 1, false, &m.model[0])
-
-	m.textureUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("tex\x00"))
-	gl.Uniform1i(m.textureUniform, 0)
-
-	gl.BindFragDataLocation(m.currentProgram, 0, gl.Str("outputColor\x00"))
-
-	// Load the texture
-	m.textures.LoadTexture("assets/textures/square.png", "square")
-	texture, status := m.textures.GetTexture("square")
-	if status {
-		m.currentTexture = texture
-	} else {
-		fmt.Println("Unable to load texture")
-	}
-
-	// Configure the vertex data
-	gl.GenVertexArrays(1, &m.vao)
-	gl.BindVertexArray(m.vao)
-
-	var vbo uint32
-	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(m.vertices)*4, gl.Ptr(m.vertices), gl.STATIC_DRAW)
-
-	vertAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vert\x00")))
-	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
-
-	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
-	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*4))
 }
 
 var cubeVertices = []float32{
