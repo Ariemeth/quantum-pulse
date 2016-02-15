@@ -1,12 +1,11 @@
 package engine
 
 type scene struct {
-	entities map[string]Renderable
+	Entities map[string]*Entity
 }
 
 //Scene represents a logical grouping of entities
 type Scene interface {
-	Renderable
 }
 
 //NewScene creates a new Scene
@@ -15,12 +14,7 @@ func NewScene() Scene {
 	return scene
 }
 
-//Update updates all entities in the scene
-func (s *scene) Update() {
-
-}
-
-//Render renders all objects in the scene
-func (s *scene) Render() {
-
+//AddEntity adds an Entity to the scene
+func (s *scene) AddEntity(ent *Entity){
+	s.Entities[ent.ID()] = ent
 }
