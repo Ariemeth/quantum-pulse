@@ -16,10 +16,11 @@ const windowHeight = 600
 
 //Engine constitutes the rendering engine
 type Engine struct {
-	window   *glfw.Window
-	shaders  sm.ShaderManager
-	textures tm.TextureManager
-	scene    Scene
+	window       *glfw.Window
+	shaders      sm.ShaderManager
+	textures     tm.TextureManager
+	scenes       map[string]Scene
+	currentScene Scene
 }
 
 //Init is called to initialize glfw and opengl
@@ -34,7 +35,7 @@ func (e *Engine) Init() {
 
 	e.shaders = sm.NewShaderManager()
 	e.textures = tm.NewTextureManager()
-	e.scene = NewScene()
+	e.scenes = make(map[string]Scene)
 }
 
 //Run is runs the main engine loop
@@ -98,13 +99,18 @@ func (e *Engine) Run() {
 		time := glfw.GetTime()
 		elapsed := time - previousTime
 		previousTime = time
-		e.scene.Update()
+		if e.currentScene != nil {
+			e.currentScene.Update()
+		}
 
 		angle += elapsed
 		model = mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0})
 
 		// Render
-		e.scene.Render()
+		if e.currentScene != nil {
+			e.currentScene.Render()
+		}
+
 		gl.UseProgram(program)
 		gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
 
@@ -153,6 +159,19 @@ func createWindow() *glfw.Window {
 	window.SetCursorPosCallback(onCursorPos)
 
 	return window
+}
+
+//AddScene adds a scene into the engine
+func (e *Engine) AddScene(scene Scene, name string) {
+	e.scenes[name] = scene
+}
+
+//LoadScene loads a scene
+func (e *Engine) LoadScene(name string) {
+	scene, status := e.scenes[name]
+	if status {
+		e.currentScene = scene
+	}
 }
 
 func initGL() string {
