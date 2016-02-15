@@ -19,6 +19,7 @@ type Engine struct {
 	window   *glfw.Window
 	shaders  sm.ShaderManager
 	textures tm.TextureManager
+	scene    Scene
 }
 
 //Init is called to initialize glfw and opengl
@@ -33,6 +34,7 @@ func (e *Engine) Init() {
 
 	e.shaders = sm.NewShaderManager()
 	e.textures = tm.NewTextureManager()
+	e.scene = NewScene()
 }
 
 //Run is runs the main engine loop
@@ -96,11 +98,13 @@ func (e *Engine) Run() {
 		time := glfw.GetTime()
 		elapsed := time - previousTime
 		previousTime = time
+		e.scene.Update()
 
 		angle += elapsed
 		model = mgl32.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0})
 
 		// Render
+		e.scene.Render()
 		gl.UseProgram(program)
 		gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
 
