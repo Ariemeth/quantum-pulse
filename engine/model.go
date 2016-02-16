@@ -75,6 +75,7 @@ func (m *Model) Render() {
 
 	gl.DrawArrays(gl.TRIANGLES, 0, 6*2*3)
 
+	gl.BindVertexArray(0)
 }
 
 func (m *Model) Load() {
@@ -115,7 +116,7 @@ func (m *Model) Load() {
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, len(cubeVertices)*4, gl.Ptr(cubeVertices), gl.STATIC_DRAW)
-	fmt.Println("orig size: ", len(cubeVertices))
+
 	vertAttrib := uint32(gl.GetAttribLocation(program, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
 	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, gl.PtrOffset(0))
@@ -128,6 +129,8 @@ func (m *Model) Load() {
 	m.vao = vao
 	m.model = model
 	m.modelUniform = modelUniform
+
+	gl.BindVertexArray(0)
 }
 
 var cubeVertices = []float32{
