@@ -79,23 +79,23 @@ func (m *Model) Render() {
 	gl.BindVertexArray(0)
 }
 
+//Load loads and sets up the model
 func (m *Model) Load() {
 	gl.UseProgram(m.currentProgram)
 
-	projection := mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
-	projectionUniform := gl.GetUniformLocation(m.currentProgram, gl.Str("projection\x00"))
-	gl.UniformMatrix4fv(projectionUniform, 1, false, &projection[0])
+	m.projection = mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
+	m.projectionUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("projection\x00"))
+	gl.UniformMatrix4fv(m.projectionUniform, 1, false, &m.projection[0])
 
-	camera := mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	cameraUniform := gl.GetUniformLocation(m.currentProgram, gl.Str("camera\x00"))
-	gl.UniformMatrix4fv(cameraUniform, 1, false, &camera[0])
+	m.camera = mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	m.cameraUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("camera\x00"))
+	gl.UniformMatrix4fv(m.cameraUniform, 1, false, &m.camera[0])
 
-	model := mgl32.Ident4()
-	modelUniform := gl.GetUniformLocation(m.currentProgram, gl.Str("model\x00"))
-	gl.UniformMatrix4fv(modelUniform, 1, false, &model[0])
+	m.modelUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("model\x00"))
+	gl.UniformMatrix4fv(m.modelUniform, 1, false, &m.model[0])
 
-	textureUniform := gl.GetUniformLocation(m.currentProgram, gl.Str("tex\x00"))
-	gl.Uniform1i(textureUniform, 0)
+	m.textureUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("tex\x00"))
+	gl.Uniform1i(m.textureUniform, 0)
 
 	gl.BindFragDataLocation(m.currentProgram, 0, gl.Str("outputColor\x00"))
 
@@ -103,9 +103,8 @@ func (m *Model) Load() {
 	m.textures.LoadTexture("assets/textures/square.png", "square")
 
 	// Configure the vertex data
-	var vao uint32
-	gl.GenVertexArrays(1, &vao)
-	gl.BindVertexArray(vao)
+	gl.GenVertexArrays(1, &m.vao)
+	gl.BindVertexArray(m.vao)
 
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
@@ -119,11 +118,6 @@ func (m *Model) Load() {
 	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
 	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*4))//5:number of values per vertex, 4:number of bytes in a float32
-
-	//m.currentProgram = program
-	m.vao = vao
-	m.model = model
-	m.modelUniform = modelUniform
 
 	gl.BindVertexArray(0)
 }
