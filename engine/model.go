@@ -40,7 +40,7 @@ func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, s
 		projection: mgl32.Ident4(),
 		vertices:   cubeVertices,
 	}
-	
+
 	program, status := shaders.GetShader(shader)
 	if status {
 		m.currentProgram = program
@@ -117,7 +117,7 @@ func (m *Model) Load() {
 
 	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*4))//5:number of values per vertex, 4:number of bytes in a float32
+	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 5*4, gl.PtrOffset(3*4)) //5:number of values per vertex, 4:number of bytes in a float32
 
 	gl.BindVertexArray(0)
 }
