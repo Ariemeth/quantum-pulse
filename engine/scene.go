@@ -15,6 +15,6 @@ func NewScene() Scene {
 }
 
 //AddEntity adds an Entity to the scene
-func (s *scene) AddEntity(ent *Entity){
+func (s *scene) AddEntity(ent *Entity) {
 	s.Entities[ent.ID()] = ent
 }
