@@ -77,7 +77,7 @@ func (m *Model) Render() {
 	}
 	*/
 	if m.indices != nil {
-		gl.DrawElements(gl.TRIANGLE_FAN, int32(len(m.indices)), gl.UNSIGNED_INT, nil)
+		gl.DrawElements(gl.TRIANGLE_FAN, int32(len(m.indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
 	} else {
 		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(m.vertices))/5)
 	}
@@ -114,9 +114,16 @@ func (m *Model) Load(isIndexed bool) {
 
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
-	fmt.Println(vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, len(m.vertices)*4, gl.Ptr(m.vertices), gl.STATIC_DRAW)
+
+	vertAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vert\x00")))
+	gl.EnableVertexAttribArray(vertAttrib)
+	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 3*4, gl.PtrOffset(0)) //5:number of values per vertex, 4:number of bytes in a float32
+
+	//	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
+	//	gl.EnableVertexAttribArray(texCoordAttrib)
+	//	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 3*4, gl.PtrOffset(3*4)) //5:number of values per vertex, 4:number of bytes in a float32
 
 	if isIndexed {
 		var indices uint32
@@ -124,14 +131,6 @@ func (m *Model) Load(isIndexed bool) {
 		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices)
 		gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(m.indices)*4, gl.Ptr(m.indices), gl.STATIC_DRAW)
 	}
-
-	vertAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vert\x00")))
-	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 3*4, gl.PtrOffset(0)) //5:number of values per vertex, 4:number of bytes in a float32
-
-	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
-	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 3*4, gl.PtrOffset(3*4)) //5:number of values per vertex, 4:number of bytes in a float32
 
 	gl.BindVertexArray(0)
 }
@@ -191,8 +190,8 @@ type point struct {
 	X float32
 	Y float32
 	Z float32
-	T float32
 	U float32
+	V float32
 }
 
 var (
@@ -224,24 +223,24 @@ var hexIndices = []uint32{
 var hexVertices = []float32{
 	//  X, Y, Z, U, V
 	// Bottom
-	Center.X, Center.Y, Center.Z, Center.T, Center.U,
-	P1.X, P1.Y, P1.Z, P1.T, P1.U,
-	P2.X, P2.Y, P2.Z, P2.T, P2.U,
-	Center.X, Center.Y, Center.Z, Center.T, Center.U,
-	P2.X, P2.Y, P2.Z, P2.T, P2.U,
-	P3.X, P3.Y, P3.Z, P3.T, P3.U,
-	Center.X, Center.Y, Center.Z, Center.T, Center.U,
-	P3.X, P3.Y, P3.Z, P3.T, P3.U,
-	P4.X, P4.Y, P4.Z, P4.T, P4.U,
-	Center.X, Center.Y, Center.Z, Center.T, Center.U,
-	P4.X, P4.Y, P4.Z, P4.T, P4.U,
-	P5.X, P5.Y, P5.Z, P5.T, P5.U,
-	Center.X, Center.Y, Center.Z, Center.T, Center.U,
-	P5.X, P5.Y, P5.Z, P5.T, P5.U,
-	P6.X, P6.Y, P6.Z, P6.T, P6.U,
-	Center.X, Center.Y, Center.Z, Center.T, Center.U,
-	P6.X, P6.Y, P6.Z, P6.T, P6.U,
-	P1.X, P1.Y, P1.Z, P1.T, P1.U,
+	Center.X, Center.Y, Center.Z, Center.U, Center.V,
+	P1.X, P1.Y, P1.Z, P1.U, P1.V,
+	P2.X, P2.Y, P2.Z, P2.U, P2.V,
+	Center.X, Center.Y, Center.Z, Center.U, Center.V,
+	P2.X, P2.Y, P2.Z, P2.U, P2.V,
+	P3.X, P3.Y, P3.Z, P3.U, P3.V,
+	Center.X, Center.Y, Center.Z, Center.U, Center.V,
+	P3.X, P3.Y, P3.Z, P3.U, P3.V,
+	P4.X, P4.Y, P4.Z, P4.U, P4.V,
+	Center.X, Center.Y, Center.Z, Center.U, Center.V,
+	P4.X, P4.Y, P4.Z, P4.U, P4.V,
+	P5.X, P5.Y, P5.Z, P5.U, P5.V,
+	Center.X, Center.Y, Center.Z, Center.U, Center.V,
+	P5.X, P5.Y, P5.Z, P5.U, P5.V,
+	P6.X, P6.Y, P6.Z, P6.U, P6.V,
+	Center.X, Center.Y, Center.Z, Center.U, Center.V,
+	P6.X, P6.Y, P6.Z, P6.U, P6.V,
+	P1.X, P1.Y, P1.Z, P1.U, P1.V,
 
 	// Top
 
