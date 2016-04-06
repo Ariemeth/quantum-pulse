@@ -43,7 +43,7 @@ func (e *Engine) Init() {
 func (e *Engine) Run() {
 	defer glfw.Terminate()
 	e.cube = NewModel("cube", e.shaders, e.textures, "simple")
-	e.cube.Load()
+	e.cube.Load(true)
 
 	program, isLoaded := e.shaders.GetShader(e.shaders.GetDefaultShader())
 	if isLoaded {
@@ -127,7 +127,7 @@ func initGL() string {
 	// Configure global settings
 	gl.Enable(gl.DEPTH_TEST)
 	gl.DepthFunc(gl.LESS)
-	gl.ClearColor(1.0, 1.0, 1.0, 1.0)
+	gl.ClearColor(0.5, 0.5, 0.5, 1.0)
 
 	return version
 }
