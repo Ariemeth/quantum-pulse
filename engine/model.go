@@ -40,7 +40,7 @@ func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, s
 		camera:     mgl32.Ident4(),
 		projection: mgl32.Ident4(),
 		vertices:   iHexVerts,
-		indices:   hexIndices,
+		indices:    hexIndices,
 	}
 
 	program, status := shaders.GetShader(shader)
@@ -68,20 +68,19 @@ func (m *Model) Render() {
 
 	gl.ActiveTexture(gl.TEXTURE0)
 	/* currently disabling the texture load
-		texture, isLoaded := m.textures.GetTexture("square")
+	texture, isLoaded := m.textures.GetTexture("square")
 
-		if isLoaded {
-			gl.BindTexture(gl.TEXTURE_2D, texture)
-		} else {
-			fmt.Println("Unable to load texture")
-		}
+	if isLoaded {
+		gl.BindTexture(gl.TEXTURE_2D, texture)
+	} else {
+		fmt.Println("Unable to load texture")
+	}
 	*/
-	if m.indices != nil{
+	if m.indices != nil {
 		gl.DrawElements(gl.TRIANGLE_FAN, int32(len(m.indices)), gl.UNSIGNED_INT, nil)
 	} else {
 		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(m.vertices))/5)
 	}
-	
 
 	gl.BindVertexArray(0)
 }
@@ -210,19 +209,18 @@ var iHexVerts = []float32{
 	// X, Y, Z
 	// Top
 	Center.X, Center.Y, Center.Z,
-	P1.X, P1.Y, P1.Z, 
-	P2.X, P2.Y, P2.Z, 
+	P1.X, P1.Y, P1.Z,
+	P2.X, P2.Y, P2.Z,
 	P3.X, P3.Y, P3.Z,
-	P4.X, P4.Y, P4.Z, 
-	P5.X, P5.Y, P5.Z, 
-	P6.X, P6.Y, P6.Z, 
+	P4.X, P4.Y, P4.Z,
+	P5.X, P5.Y, P5.Z,
+	P6.X, P6.Y, P6.Z,
 }
 
 var hexIndices = []uint32{
 	0, 1, 2, 3, 4, 5, 6, 1,
 }
 
-/*
 var hexVertices = []float32{
 	//  X, Y, Z, U, V
 	// Bottom
@@ -256,4 +254,3 @@ var hexVertices = []float32{
 	// Right
 
 }
-*/
