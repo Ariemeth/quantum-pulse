@@ -8,6 +8,6 @@ out vec4 outputColor;
 in vec4 position;
 
 void main() {
-    //outputColor = texture(tex, fragTexCoord);
-	outputColor = vec4(position.x*0.25, position.y*0.75, position.z, 0);
+    outputColor = texture(tex, fragTexCoord);
+	//outputColor = vec4(position.x*0.25, position.y*0.75, position.z, 0);
 }

@@ -67,7 +67,7 @@ func (m *Model) Render() {
 	gl.BindVertexArray(m.vao)
 
 	gl.ActiveTexture(gl.TEXTURE0)
-	/* currently disabling the texture load
+	
 	texture, isLoaded := m.textures.GetTexture("square")
 
 	if isLoaded {
@@ -75,7 +75,7 @@ func (m *Model) Render() {
 	} else {
 		fmt.Println("Unable to load texture")
 	}
-	*/
+	
 	if m.indices != nil {
 		gl.DrawElements(gl.TRIANGLE_FAN, int32(len(m.indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
 	} else {
@@ -106,7 +106,7 @@ func (m *Model) Load(isIndexed bool) {
 	gl.BindFragDataLocation(m.currentProgram, 0, gl.Str("outputColor\x00"))
 
 	// Load the texture
-	//	m.textures.LoadTexture("assets/textures/square.png", "square")
+	m.textures.LoadTexture("assets/textures/square.png", "square")
 
 	// Configure the vertex data
 	gl.GenVertexArrays(1, &m.vao)
@@ -121,9 +121,9 @@ func (m *Model) Load(isIndexed bool) {
 	gl.EnableVertexAttribArray(vertAttrib)
 	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 3*4, gl.PtrOffset(0)) //5:number of values per vertex, 4:number of bytes in a float32
 
-	//	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
-	//	gl.EnableVertexAttribArray(texCoordAttrib)
-	//	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, false, 3*4, gl.PtrOffset(3*4)) //5:number of values per vertex, 4:number of bytes in a float32
+	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
+	gl.EnableVertexAttribArray(texCoordAttrib)
+	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, 3*4, gl.PtrOffset(3*4)) //5:number of values per vertex, 4:number of bytes in a float32
 
 	if isIndexed {
 		var indices uint32
@@ -208,12 +208,24 @@ var iHexVerts = []float32{
 	// X, Y, Z
 	// Top
 	Center.X, Center.Y, Center.Z,
-	P1.X, P1.Y, P1.Z,
-	P2.X, P2.Y, P2.Z,
+	P1.X, P1.Y, P1.Z, 
+	P2.X, P2.Y, P2.Z, 
 	P3.X, P3.Y, P3.Z,
 	P4.X, P4.Y, P4.Z,
-	P5.X, P5.Y, P5.Z,
+	P5.X, P5.Y, P5.Z, 
 	P6.X, P6.Y, P6.Z,
+}
+
+var iHexVerts2 = []float32{
+	// X, Y, Z
+	// Top
+	Center.X, Center.Y, Center.Z,
+	P1.X, P1.Y, P1.Z, P1.U, P1.V,
+	P2.X, P2.Y, P2.Z, P2.U, P2.V,
+	P3.X, P3.Y, P3.Z, P3.U, P3.V,
+	P4.X, P4.Y, P4.Z, P4.U, P4.V,
+	P5.X, P5.Y, P5.Z, P5.U, P5.V,
+	P6.X, P6.Y, P6.Z, P6.U, P6.V,
 }
 
 var hexIndices = []uint32{
