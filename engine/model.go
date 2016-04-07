@@ -39,7 +39,7 @@ func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, s
 		model:      mgl32.Ident4(),
 		camera:     mgl32.Ident4(),
 		projection: mgl32.Ident4(),
-		vertices:   iHexVerts,
+		vertices:   iHexVerts2,
 		indices:    hexIndices,
 	}
 
@@ -119,11 +119,11 @@ func (m *Model) Load(isIndexed bool) {
 
 	vertAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 3*4, gl.PtrOffset(0)) //5:number of values per vertex, 4:number of bytes in a float32
+	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, gl.PtrOffset(0)) //5:number of values per vertex, 4:number of bytes in a float32
 
 	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, 3*4, gl.PtrOffset(3*4)) //5:number of values per vertex, 4:number of bytes in a float32
+	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, 5*4, gl.PtrOffset(3*4)) //5:number of values per vertex, 4:number of bytes in a float32
 
 	if isIndexed {
 		var indices uint32
@@ -219,7 +219,7 @@ var iHexVerts = []float32{
 var iHexVerts2 = []float32{
 	// X, Y, Z
 	// Top
-	Center.X, Center.Y, Center.Z,
+	Center.X, Center.Y, Center.Z, Center.U, Center.V,
 	P1.X, P1.Y, P1.Z, P1.U, P1.V,
 	P2.X, P2.Y, P2.Z, P2.U, P2.V,
 	P3.X, P3.Y, P3.Z, P3.U, P3.V,
