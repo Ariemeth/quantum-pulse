@@ -67,7 +67,7 @@ func (m *Model) Render() {
 	gl.BindVertexArray(m.vao)
 
 	gl.ActiveTexture(gl.TEXTURE0)
-	
+
 	texture, isLoaded := m.textures.GetTexture("square")
 
 	if isLoaded {
@@ -75,7 +75,7 @@ func (m *Model) Render() {
 	} else {
 		fmt.Println("Unable to load texture")
 	}
-	
+
 	if m.indices != nil {
 		gl.DrawElements(gl.TRIANGLE_FAN, int32(len(m.indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
 	} else {
@@ -208,11 +208,11 @@ var iHexVerts = []float32{
 	// X, Y, Z
 	// Top
 	Center.X, Center.Y, Center.Z,
-	P1.X, P1.Y, P1.Z, 
-	P2.X, P2.Y, P2.Z, 
+	P1.X, P1.Y, P1.Z,
+	P2.X, P2.Y, P2.Z,
 	P3.X, P3.Y, P3.Z,
 	P4.X, P4.Y, P4.Z,
-	P5.X, P5.Y, P5.Z, 
+	P5.X, P5.Y, P5.Z,
 	P6.X, P6.Y, P6.Z,
 }
 
