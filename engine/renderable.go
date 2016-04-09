@@ -2,7 +2,7 @@ package engine
 
 // Renderable represents an object that can be rendered
 type Renderable interface {
-	Entity
+	EntityOld
 	Update(elapsed float64)
 	Render()
 }

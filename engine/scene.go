@@ -15,7 +15,7 @@ const (
 )
 
 type scene struct {
-	Entities    map[string]Entity
+	Entities    map[string]EntityOld
 	Renderables map[string]Renderable
 	fileName    string
 	shaders     sm.ShaderManager
@@ -25,14 +25,14 @@ type scene struct {
 // Scene represents a logical grouping of entities
 type Scene interface {
 	Renderable
-	AddEntity(Entity)
+	AddEntity(EntityOld)
 }
 
 // NewScene creates a new Scene
 func NewScene(fileName string, shaders sm.ShaderManager, textures tm.TextureManager) Scene {
 	scene := scene{
 		fileName:    fileName,
-		Entities:    make(map[string]Entity),
+		Entities:    make(map[string]EntityOld),
 		Renderables: make(map[string]Renderable),
 		shaders:     shaders,
 		textures:    textures,
@@ -49,7 +49,7 @@ func (s *scene) ID() string {
 }
 
 // AddEntity adds an Entity to the scene.
-func (s *scene) AddEntity(ent Entity) {
+func (s *scene) AddEntity(ent EntityOld) {
 	s.Entities[ent.ID()] = ent
 
 	// if it is also a Renderable add it to the map of Renderables

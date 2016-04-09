@@ -1,3 +1,4 @@
+// Package engine represents the core functionality that allow the engine to be run and process the various systems and components.
 package engine
 
 import (
@@ -13,7 +14,7 @@ import (
 const windowWidth = 800
 const windowHeight = 600
 
-// Engine constitutes the rendering engine
+// Engine constitutes the rendering engine which creates and initializes the rendering system.
 type Engine struct {
 	window       *glfw.Window
 	shaders      sm.ShaderManager
@@ -79,9 +80,9 @@ func (e *Engine) LoadScene(name string) {
 // LoadSceneFile loads a scene from a file but does not make it the current scene. You
 // must still call LoadScene with the scene id to load it as the current scene.  LoadSceneFile
 // should not be called before Init is called.
-func (e *Engine) LoadSceneFile(fileName string) (string){
+func (e *Engine) LoadSceneFile(fileName string) string {
 	scene := NewScene(fileName, e.shaders, e.textures)
-	e.AddScene(scene,scene.ID())
+	e.AddScene(scene, scene.ID())
 	return scene.ID()
 }
 

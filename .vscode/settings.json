@@ -6,13 +6,13 @@
 	"go.vetOnSave": true,
 	"go.formatTool": "goreturns",
 	// [EXPERIMENTAL] Run formatting tool on save.
-	"go.formatOnSave": false,
-	
+	"go.formatOnSave": true,
+
 	//Editor overwrites
 	"editor.tabSize": 4,
 	"editor.insertSpaces": false,
 	"window.reopenFolders": "all",
-	
+
 	// Configure glob patterns for excluding files and folders.
 	"files.exclude": {
 		"*.exe": true,
