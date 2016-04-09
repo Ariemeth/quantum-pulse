@@ -77,7 +77,7 @@ func (m *Model) Render() {
 		gl.BindTexture(gl.TEXTURE_2D, texture)
 	} else {
 		if m.data.TextureFile != "" {
-			fmt.Printf("Unable to load texture %s", m.data.TextureFile)
+			go fmt.Printf("Unable to load texture %s", m.data.TextureFile)
 		}
 	}
 
