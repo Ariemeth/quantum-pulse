@@ -44,5 +44,7 @@
 	1.0, 1.0, 1.0, 0.0, 1.0
 	],
 	"vertSize":5,
-	"textureFile":"square.png"
+	"textureFile":"square.png",
+	"fragShaderFile":"simple.frag",
+	"vertShaderFile":"simple.vert"
 }

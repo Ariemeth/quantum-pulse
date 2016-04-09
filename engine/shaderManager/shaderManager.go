@@ -40,6 +40,10 @@ func NewShaderManager() ShaderManager {
 
 // LoadProgram creates a shader program from a vertex and fragment shader source files.
 func (sm *shaderManager) LoadProgram(shader Shader, shouldBeDefault bool) {
+	
+	if _, alreadyLoaded := sm.GetShader(shader.Name); alreadyLoaded {
+		return
+	}
 
 	if len(shader.VertSrc) < 1 {
 		simpleVert, err := loadShader(shader.VertSrcFile)

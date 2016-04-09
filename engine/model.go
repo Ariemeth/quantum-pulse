@@ -145,9 +145,11 @@ func (m *Model) LoadFile(fileName string) {
 }
 
 type vertexData struct {
-	Indexed     bool      `json:"indexed"`
-	Verts       []float32 `json:"verts"`
-	Indices     []uint32  `json:"indices"`
-	VertSize    int32     `json:"vertSize"`
-	TextureFile string    `json:"textureFile"`
+	Indexed        bool      `json:"indexed"`
+	Verts          []float32 `json:"verts"`
+	Indices        []uint32  `json:"indices"`
+	VertSize       int32     `json:"vertSize"`
+	TextureFile    string    `json:"textureFile"`
+	FragShaderFile string    `json:"fragShaderFile"`
+	VertShaderFile string    `json:"vertShaderFile"`
 }
