@@ -70,7 +70,7 @@ func (m *Model) Render() {
 	if isLoaded {
 		gl.BindTexture(gl.TEXTURE_2D, texture)
 	} else {
-		fmt.Println("Unable to load texture")
+		fmt.Printf("Unable to load texture %s", m.data.TextureFile)
 	}
 
 	if m.data.Indexed {
@@ -121,7 +121,7 @@ func (m *Model) Load(isIndexed bool) {
 
 	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true,m.data.VertSize*4, gl.PtrOffset(3*4)) // 4:number of bytes in a float32
+	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, m.data.VertSize*4, gl.PtrOffset(3*4)) // 4:number of bytes in a float32
 
 	if m.data.Indexed {
 		var indices uint32
@@ -148,6 +148,6 @@ type vertexData struct {
 	Indexed     bool      `json:"indexed"`
 	Verts       []float32 `json:"verts"`
 	Indices     []uint32  `json:"indices"`
-	VertSize    int32      `json:"vertSize"`
+	VertSize    int32     `json:"vertSize"`
 	TextureFile string    `json:"textureFile"`
 }

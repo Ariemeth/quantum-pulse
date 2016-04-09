@@ -1,13 +1,15 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-    //Go related settings
-    "go.buildOnSave": true,
-    "go.lintOnSave": true,
-    "go.vetOnSave": true,
-    "go.formatTool": "goreturns",
-    
-    //Editor overwrites
-    "editor.tabSize": 4,
-    "editor.insertSpaces": false,
-    "window.reopenFolders": "all"
+	//Go related settings
+	"go.buildOnSave": true,
+	"go.lintOnSave": true,
+	"go.vetOnSave": true,
+	"go.formatTool": "goreturns",
+	// [EXPERIMENTAL] Run formatting tool on save.
+	"go.formatOnSave": false,
+	
+	//Editor overwrites
+	"editor.tabSize": 4,
+	"editor.insertSpaces": false,
+	"window.reopenFolders": "all"
 }
