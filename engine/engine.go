@@ -75,7 +75,7 @@ func (e *Engine) Run() {
 
 // LoadShaders loads a vertex and fragment shader as a shader program
 func (e *Engine) LoadShaders(shader sm.Shader, shouldBeDefault bool) {
-	e.shaders.LoadProgram(shader, shouldBeDefault)
+	e.shaders.LoadProgram(shader, shouldBeDefault) 
 }
 
 func createWindow() *glfw.Window {

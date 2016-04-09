@@ -40,12 +40,13 @@ func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, s
 		projection: mgl32.Ident4(),
 	}
 
-	program, status := shaders.GetShader(shader)
+/*	program, status := shaders.GetShader(shader)
 	if status {
 		m.currentProgram = program
 	} else {
 		fmt.Println("unable to load program ", shader, ": ", program)
 	}
+	*/
 	return &m
 }
 
@@ -84,7 +85,16 @@ func (m *Model) Render() {
 
 // Load loads and sets up the model
 func (m *Model) Load(isIndexed bool) {
+	
 	m.LoadFile("hexagon.json")
+	
+	shader := sm.Shader{VertSrcFile: m.data.VertShaderFile, FragSrcFile: m.data.FragShaderFile, Name: fmt.Sprintf("%s:%s",m.data.VertShaderFile,m.data.FragShaderFile)}
+	program, err :=m.shaders.LoadProgram(shader, false) 
+	if err != nil{
+		return
+	}
+	m.currentProgram = program
+	
 	gl.UseProgram(m.currentProgram)
 
 	m.projection = mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
