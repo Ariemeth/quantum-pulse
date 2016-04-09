@@ -35,7 +35,7 @@ type Model struct {
 }
 
 // NewModel creates a new model.
-func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, shader string) *Model {
+func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager) *Model {
 	m := Model{
 		id:         id,
 		shaders:    shaders,

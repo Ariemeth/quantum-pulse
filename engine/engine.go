@@ -42,7 +42,7 @@ func (e *Engine) Init() {
 // Run is runs the main engine loop
 func (e *Engine) Run() {
 	defer glfw.Terminate()
-	e.cube = NewModel("cube", e.shaders, e.textures, "simple")
+	e.cube = NewModel("hexagon", e.shaders, e.textures)
 	e.cube.Load("hexagon.json")
 
 	program, isLoaded := e.shaders.GetShader(e.shaders.GetDefaultShader())
