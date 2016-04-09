@@ -1,7 +1,9 @@
 package engine
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 
 	sm "github.com/Ariemeth/frame-assault-2/engine/shaderManager"
 	tm "github.com/Ariemeth/frame-assault-2/engine/textureManager"
@@ -11,8 +13,7 @@ import (
 
 // Model represents a physical entity
 type Model struct {
-	vertices          []float32
-	indices           []uint32
+	data              vertexData
 	shaders           sm.ShaderManager
 	textures          tm.TextureManager
 	angle             float64
@@ -30,15 +31,13 @@ type Model struct {
 
 // NewModel creates a new model
 func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, shader string) *Model {
-	m := Model{		
+	m := Model{
 		shaders:    shaders,
 		textures:   textures,
 		angle:      0.0,
 		model:      mgl32.Ident4(),
 		camera:     mgl32.Ident4(),
 		projection: mgl32.Ident4(),
-		vertices:   iHexVerts2,
-		indices:    hexIndices,
 	}
 
 	program, status := shaders.GetShader(shader)
@@ -74,10 +73,10 @@ func (m *Model) Render() {
 		fmt.Println("Unable to load texture")
 	}
 
-	if m.indices != nil {
-		gl.DrawElements(gl.TRIANGLE_FAN, int32(len(m.indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
+	if m.data.Indexed {
+		gl.DrawElements(gl.TRIANGLE_FAN, int32(len(m.data.Indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
 	} else {
-		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(m.vertices))/5)
+		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(m.data.Verts))/5)
 	}
 
 	gl.BindVertexArray(0)
@@ -85,6 +84,7 @@ func (m *Model) Render() {
 
 // Load loads and sets up the model
 func (m *Model) Load(isIndexed bool) {
+	m.LoadFile("hexagon.json")
 	gl.UseProgram(m.currentProgram)
 
 	m.projection = mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
@@ -113,7 +113,7 @@ func (m *Model) Load(isIndexed bool) {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(m.vertices)*4, gl.Ptr(m.vertices), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(m.data.Verts)*4, gl.Ptr(m.data.Verts), gl.STATIC_DRAW)
 
 	vertAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
@@ -123,143 +123,29 @@ func (m *Model) Load(isIndexed bool) {
 	gl.EnableVertexAttribArray(texCoordAttrib)
 	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, 5*4, gl.PtrOffset(3*4)) //5:number of values per vertex, 4:number of bytes in a float32
 
-	if isIndexed {
+	if m.data.Indexed {
 		var indices uint32
 		gl.GenBuffers(1, &indices)
 		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices)
-		gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(m.indices)*4, gl.Ptr(m.indices), gl.STATIC_DRAW)
+		gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(m.data.Indices)*4, gl.Ptr(m.data.Indices), gl.STATIC_DRAW)
 	}
 
 	gl.BindVertexArray(0)
 }
 
-var cubeVertices = []float32{
-	//  X, Y, Z, U, V
-	// Bottom
-	-1.0, -1.0, -1.0, 0.0, 0.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	-1.0, -1.0, 1.0, 0.0, 1.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	1.0, -1.0, 1.0, 1.0, 1.0,
-	-1.0, -1.0, 1.0, 0.0, 1.0,
+// LoadFile loads a model's data from a json file.
+func (m *Model) LoadFile(fileName string) {
+	data, err := ioutil.ReadFile(fmt.Sprintf("assets/models/%s", fileName))
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
-	// Top
-	-1.0, 1.0, -1.0, 0.0, 0.0,
-	-1.0, 1.0, 1.0, 0.0, 1.0,
-	1.0, 1.0, -1.0, 1.0, 0.0,
-	1.0, 1.0, -1.0, 1.0, 0.0,
-	-1.0, 1.0, 1.0, 0.0, 1.0,
-	1.0, 1.0, 1.0, 1.0, 1.0,
-
-	// Front
-	-1.0, -1.0, 1.0, 1.0, 0.0,
-	1.0, -1.0, 1.0, 0.0, 0.0,
-	-1.0, 1.0, 1.0, 1.0, 1.0,
-	1.0, -1.0, 1.0, 0.0, 0.0,
-	1.0, 1.0, 1.0, 0.0, 1.0,
-	-1.0, 1.0, 1.0, 1.0, 1.0,
-
-	// Back
-	-1.0, -1.0, -1.0, 0.0, 0.0,
-	-1.0, 1.0, -1.0, 0.0, 1.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	-1.0, 1.0, -1.0, 0.0, 1.0,
-	1.0, 1.0, -1.0, 1.0, 1.0,
-
-	// Left
-	-1.0, -1.0, 1.0, 0.0, 1.0,
-	-1.0, 1.0, -1.0, 1.0, 0.0,
-	-1.0, -1.0, -1.0, 0.0, 0.0,
-	-1.0, -1.0, 1.0, 0.0, 1.0,
-	-1.0, 1.0, 1.0, 1.0, 1.0,
-	-1.0, 1.0, -1.0, 1.0, 0.0,
-
-	// Right
-	1.0, -1.0, 1.0, 1.0, 1.0,
-	1.0, -1.0, -1.0, 1.0, 0.0,
-	1.0, 1.0, -1.0, 0.0, 0.0,
-	1.0, -1.0, 1.0, 1.0, 1.0,
-	1.0, 1.0, -1.0, 0.0, 0.0,
-	1.0, 1.0, 1.0, 0.0, 1.0,
+	json.Unmarshal(data, &m.data)
 }
 
-type point struct {
-	X float32
-	Y float32
-	Z float32
-	U float32
-	V float32
-}
-
-var (
-	Center = point{0.0, 0.0, 0.0, 0.5, 0.5}
-	P1     = point{0.0, 1.0, 0.0, 0.5, 0.0}
-	P2     = point{-1.0, 0.5, 0.0, 0.0, 0.25}
-	P3     = point{-1.0, -0.5, 0.0, 0.0, 0.75}
-	P4     = point{0.0, -1.0, 0.0, 0.5, 1.0}
-	P5     = point{1.0, -0.5, 0.0, 1.0, 0.75}
-	P6     = point{1.0, 0.5, 0.0, 1.0, 0.25}
-)
-
-var iHexVerts = []float32{
-	// X, Y, Z
-	// Top
-	Center.X, Center.Y, Center.Z,
-	P1.X, P1.Y, P1.Z,
-	P2.X, P2.Y, P2.Z,
-	P3.X, P3.Y, P3.Z,
-	P4.X, P4.Y, P4.Z,
-	P5.X, P5.Y, P5.Z,
-	P6.X, P6.Y, P6.Z,
-}
-
-var iHexVerts2 = []float32{
-	// X, Y, Z
-	// Top
-	Center.X, Center.Y, Center.Z, Center.U, Center.V,
-	P1.X, P1.Y, P1.Z, P1.U, P1.V,
-	P2.X, P2.Y, P2.Z, P2.U, P2.V,
-	P3.X, P3.Y, P3.Z, P3.U, P3.V,
-	P4.X, P4.Y, P4.Z, P4.U, P4.V,
-	P5.X, P5.Y, P5.Z, P5.U, P5.V,
-	P6.X, P6.Y, P6.Z, P6.U, P6.V,
-}
-
-var hexIndices = []uint32{
-	0, 1, 2, 3, 4, 5, 6, 1,
-}
-
-var hexVertices = []float32{
-	//  X, Y, Z, U, V
-	// Bottom
-	Center.X, Center.Y, Center.Z, Center.U, Center.V,
-	P1.X, P1.Y, P1.Z, P1.U, P1.V,
-	P2.X, P2.Y, P2.Z, P2.U, P2.V,
-	Center.X, Center.Y, Center.Z, Center.U, Center.V,
-	P2.X, P2.Y, P2.Z, P2.U, P2.V,
-	P3.X, P3.Y, P3.Z, P3.U, P3.V,
-	Center.X, Center.Y, Center.Z, Center.U, Center.V,
-	P3.X, P3.Y, P3.Z, P3.U, P3.V,
-	P4.X, P4.Y, P4.Z, P4.U, P4.V,
-	Center.X, Center.Y, Center.Z, Center.U, Center.V,
-	P4.X, P4.Y, P4.Z, P4.U, P4.V,
-	P5.X, P5.Y, P5.Z, P5.U, P5.V,
-	Center.X, Center.Y, Center.Z, Center.U, Center.V,
-	P5.X, P5.Y, P5.Z, P5.U, P5.V,
-	P6.X, P6.Y, P6.Z, P6.U, P6.V,
-	Center.X, Center.Y, Center.Z, Center.U, Center.V,
-	P6.X, P6.Y, P6.Z, P6.U, P6.V,
-	P1.X, P1.Y, P1.Z, P1.U, P1.V,
-
-	// Top
-
-	// Front
-
-	// Back
-
-	// Left
-
-	// Right
-
+type vertexData struct {
+	Indexed bool      `json:"indexed"`
+	Verts   []float32 `json:"verts"`
+	Indices []uint32  `json:"indices"`
 }
