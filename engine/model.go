@@ -76,7 +76,9 @@ func (m *Model) Render() {
 	if isLoaded {
 		gl.BindTexture(gl.TEXTURE_2D, texture)
 	} else {
-		fmt.Printf("Unable to load texture %s", m.data.TextureFile)
+		if m.data.TextureFile != "" {
+			fmt.Printf("Unable to load texture %s", m.data.TextureFile)
+		}
 	}
 
 	if m.data.Indexed {
@@ -89,9 +91,9 @@ func (m *Model) Render() {
 }
 
 // Load loads and sets up the model
-func (m *Model) Load(isIndexed bool) {
+func (m *Model) Load(fileName string) {
 
-	m.LoadFile("hexagon.json")
+	m.LoadFile(fileName)
 
 	shader := sm.Shader{VertSrcFile: m.data.VertShaderFile, FragSrcFile: m.data.FragShaderFile, Name: fmt.Sprintf("%s:%s", m.data.VertShaderFile, m.data.FragShaderFile)}
 	program, err := m.shaders.LoadProgram(shader, false)
