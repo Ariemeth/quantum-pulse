@@ -73,9 +73,17 @@ func (e *Engine) Run() {
 	}
 }
 
-// LoadShaders loads a vertex and fragment shader as a shader program
-func (e *Engine) LoadShaders(shader sm.Shader, shouldBeDefault bool) {
-	e.shaders.LoadProgram(shader, shouldBeDefault) 
+// AddScene adds a scene into the engine
+func (e *Engine) AddScene(scene Scene, name string) {
+	e.scenes[name] = scene
+}
+
+//LoadScene loads a scene
+func (e *Engine) LoadScene(name string) {
+	scene, status := e.scenes[name]
+	if status {
+		e.currentScene = scene
+	}
 }
 
 func createWindow() *glfw.Window {
@@ -98,19 +106,6 @@ func createWindow() *glfw.Window {
 	window.SetCursorPosCallback(onCursorPos)
 
 	return window
-}
-
-// AddScene adds a scene into the engine
-func (e *Engine) AddScene(scene Scene, name string) {
-	e.scenes[name] = scene
-}
-
-//LoadScene loads a scene
-func (e *Engine) LoadScene(name string) {
-	scene, status := e.scenes[name]
-	if status {
-		e.currentScene = scene
-	}
 }
 
 func initGL() string {
