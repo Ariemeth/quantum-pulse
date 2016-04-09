@@ -45,13 +45,6 @@ func (e *Engine) Run() {
 	e.cube = NewModel("hexagon", e.shaders, e.textures)
 	e.cube.Load("hexagon.json")
 
-	program, isLoaded := e.shaders.GetShader(e.shaders.GetDefaultShader())
-	if isLoaded {
-		gl.UseProgram(program)
-	} else {
-		fmt.Println("Unable to load default shader")
-	}
-
 	previousTime := glfw.GetTime()
 
 	for !e.window.ShouldClose() {
