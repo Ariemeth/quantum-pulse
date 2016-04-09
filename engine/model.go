@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	// ModelSrcDir is the expected location of textures
+	// ModelSrcDir is the expected location of models
 	ModelSrcDir = "assets/models/"
 )
 

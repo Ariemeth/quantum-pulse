@@ -20,7 +20,6 @@ type Engine struct {
 	textures     tm.TextureManager
 	scenes       map[string]Scene
 	currentScene Scene
-	cube         *Model
 }
 
 // Init is called to initialize glfw and opengl
@@ -42,8 +41,6 @@ func (e *Engine) Init() {
 // Run is runs the main engine loop
 func (e *Engine) Run() {
 	defer glfw.Terminate()
-	e.cube = NewModel("hexagon", e.shaders, e.textures)
-	e.cube.Load("hexagon.json")
 
 	previousTime := glfw.GetTime()
 
@@ -55,10 +52,10 @@ func (e *Engine) Run() {
 		elapsed := time - previousTime
 		previousTime = time
 
-		e.cube.Update(elapsed)
+		e.currentScene.Update(elapsed)
 
 		// Render
-		e.cube.Render()
+		e.currentScene.Render()
 
 		// Maintenance
 		e.window.SwapBuffers()
@@ -71,12 +68,21 @@ func (e *Engine) AddScene(scene Scene, name string) {
 	e.scenes[name] = scene
 }
 
-//LoadScene loads a scene
+// LoadScene loads a scene
 func (e *Engine) LoadScene(name string) {
 	scene, status := e.scenes[name]
 	if status {
 		e.currentScene = scene
 	}
+}
+
+// LoadSceneFile loads a scene from a file but does not make it the current scene. You
+// must still call LoadScene with the scene id to load it as the current scene.  LoadSceneFile
+// should not be called before Init is called.
+func (e *Engine) LoadSceneFile(fileName string) (string){
+	scene := NewScene(fileName, e.shaders, e.textures)
+	e.AddScene(scene,scene.ID())
+	return scene.ID()
 }
 
 func createWindow() *glfw.Window {

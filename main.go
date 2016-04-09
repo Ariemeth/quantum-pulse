@@ -17,5 +17,7 @@ func main() {
 
 	engine.Init()
 
+	engine.LoadScene(engine.LoadSceneFile("scene1.json"))
+
 	engine.Run()
 }
