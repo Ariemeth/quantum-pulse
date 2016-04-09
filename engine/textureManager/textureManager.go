@@ -12,6 +12,11 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
+const (
+	// TextureSrcDir is the expected location of textures
+	TextureSrcDir = "assets/textures/"
+)
+
 // textureManager stores opengl textures
 type textureManager struct {
 	textures    map[string]uint32
@@ -20,8 +25,10 @@ type textureManager struct {
 
 // TextureManager interface is used to interact with a textureManager
 type TextureManager interface {
-	LoadTexture(string, string)
-	GetTexture(string) (uint32, bool)
+	// LoadTexture loads a png file into an opengl texture.
+	LoadTexture(filePath string, key string)
+	// GetTexture returns a texture id if the texture was loaded.
+	GetTexture(key string) (texture uint32, isFound bool)
 }
 
 // NewTextureManager creates a new TextureManager
@@ -54,7 +61,7 @@ func (tm *textureManager) GetTexture(key string) (uint32, bool) {
 }
 
 func newTexture(file string) (uint32, error) {
-	imgFile, err := os.Open(file)
+	imgFile, err := os.Open(fmt.Sprintf("%s%s", TextureSrcDir, file))
 	if err != nil {
 		return 0, err
 	}

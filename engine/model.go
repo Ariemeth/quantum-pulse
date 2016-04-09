@@ -11,8 +11,14 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
+const (
+	// ModelSrcDir is the expected location of textures
+	ModelSrcDir = "assets/models/"
+)
+
 // Model represents a physical entity
 type Model struct {
+	id                string
 	data              vertexData
 	shaders           sm.ShaderManager
 	textures          tm.TextureManager
@@ -29,9 +35,10 @@ type Model struct {
 	currentTexture    uint32
 }
 
-// NewModel creates a new model
+// NewModel creates a new model.
 func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, shader string) *Model {
 	m := Model{
+		id:         id,
 		shaders:    shaders,
 		textures:   textures,
 		angle:      0.0,
@@ -40,14 +47,12 @@ func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, s
 		projection: mgl32.Ident4(),
 	}
 
-/*	program, status := shaders.GetShader(shader)
-	if status {
-		m.currentProgram = program
-	} else {
-		fmt.Println("unable to load program ", shader, ": ", program)
-	}
-	*/
 	return &m
+}
+
+// ID returns the id of the model.
+func (m Model) ID() string {
+	return m.id
 }
 
 // Update updates the model
@@ -85,16 +90,16 @@ func (m *Model) Render() {
 
 // Load loads and sets up the model
 func (m *Model) Load(isIndexed bool) {
-	
+
 	m.LoadFile("hexagon.json")
-	
-	shader := sm.Shader{VertSrcFile: m.data.VertShaderFile, FragSrcFile: m.data.FragShaderFile, Name: fmt.Sprintf("%s:%s",m.data.VertShaderFile,m.data.FragShaderFile)}
-	program, err :=m.shaders.LoadProgram(shader, false) 
-	if err != nil{
+
+	shader := sm.Shader{VertSrcFile: m.data.VertShaderFile, FragSrcFile: m.data.FragShaderFile, Name: fmt.Sprintf("%s:%s", m.data.VertShaderFile, m.data.FragShaderFile)}
+	program, err := m.shaders.LoadProgram(shader, false)
+	if err != nil {
 		return
 	}
 	m.currentProgram = program
-	
+
 	gl.UseProgram(m.currentProgram)
 
 	m.projection = mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
@@ -114,7 +119,7 @@ func (m *Model) Load(isIndexed bool) {
 	gl.BindFragDataLocation(m.currentProgram, 0, gl.Str("outputColor\x00"))
 
 	// Load the texture
-	m.textures.LoadTexture(fmt.Sprintf("assets/textures/%s", m.data.TextureFile), m.data.TextureFile)
+	m.textures.LoadTexture(m.data.TextureFile, m.data.TextureFile)
 
 	// Configure the vertex data
 	gl.GenVertexArrays(1, &m.vao)
@@ -145,7 +150,7 @@ func (m *Model) Load(isIndexed bool) {
 
 // LoadFile loads a model's data from a json file.
 func (m *Model) LoadFile(fileName string) {
-	data, err := ioutil.ReadFile(fmt.Sprintf("assets/models/%s", fileName))
+	data, err := ioutil.ReadFile(fmt.Sprintf("%s%s", ModelSrcDir, fileName))
 	if err != nil {
 		fmt.Println(err.Error())
 		return

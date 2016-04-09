@@ -9,9 +9,9 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
-const(
-	// ShaderSrcDirectory lists the expected location of shaders
-	ShaderSrcDirectory = "assets/shaders/"
+const (
+	// ShaderSrcDir lists the expected location of shaders
+	ShaderSrcDir = "assets/shaders/"
 )
 
 // Shader holds information about a shader program
@@ -30,10 +30,13 @@ type shaderManager struct {
 	DefaultShader string
 }
 
-// ShaderManager interface is used to interact with the shaderManager
+// ShaderManager interface is used to interact with the shaderManager.
 type ShaderManager interface {
-	LoadProgram(Shader, bool) (uint32, error)
+	// LoadProgram creates a shader program from a vertex and fragment shader source files.
+	LoadProgram(shader Shader, shouldBeDefault bool) (uint32, error)
+	// GetShader returns a program id if the shader program was loaded.
 	GetShader(key string) (uint32, bool)
+	// GetDefaultShader returns the name of the default shader.
 	GetDefaultShader() string
 }
 
@@ -45,13 +48,13 @@ func NewShaderManager() ShaderManager {
 
 // LoadProgram creates a shader program from a vertex and fragment shader source files.
 func (sm *shaderManager) LoadProgram(shader Shader, shouldBeDefault bool) (uint32, error) {
-	
+
 	if program, alreadyLoaded := sm.GetShader(shader.Name); alreadyLoaded {
 		return program, nil
 	}
 
 	if len(shader.VertSrc) < 1 {
-		simpleVert, err := loadShader(fmt.Sprintf("%s%s",ShaderSrcDirectory,shader.VertSrcFile))
+		simpleVert, err := loadShader(fmt.Sprintf("%s%s", ShaderSrcDir, shader.VertSrcFile))
 		shader.VertSrc = simpleVert
 		if err != nil {
 			fmt.Println(err)
@@ -62,7 +65,7 @@ func (sm *shaderManager) LoadProgram(shader Shader, shouldBeDefault bool) (uint3
 	}
 
 	if len(shader.FragSrc) < 1 {
-		simpleFrag, err := loadShader(fmt.Sprintf("%s%s",ShaderSrcDirectory,shader.FragSrcFile))
+		simpleFrag, err := loadShader(fmt.Sprintf("%s%s", ShaderSrcDir, shader.FragSrcFile))
 		shader.FragSrc = simpleFrag
 		if err != nil {
 			fmt.Println(err)
@@ -89,7 +92,7 @@ func (sm *shaderManager) LoadProgram(shader Shader, shouldBeDefault bool) (uint3
 }
 
 // GetShader returns a program id if the shader program was loaded, if it was not a 0
-// false will be returned
+// false will be returned.
 func (sm *shaderManager) GetShader(key string) (uint32, bool) {
 
 	sm.programLock.RLock()
@@ -99,7 +102,7 @@ func (sm *shaderManager) GetShader(key string) (uint32, bool) {
 	return program, status
 }
 
-// GetDefaultShader returns the name of the default shader
+// GetDefaultShader returns the name of the default shader.
 func (sm *shaderManager) GetDefaultShader() string {
 	return sm.DefaultShader
 }
