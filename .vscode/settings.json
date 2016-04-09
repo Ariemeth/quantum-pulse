@@ -11,5 +11,11 @@
 	//Editor overwrites
 	"editor.tabSize": 4,
 	"editor.insertSpaces": false,
-	"window.reopenFolders": "all"
+	"window.reopenFolders": "all",
+	
+	// Configure glob patterns for excluding files and folders.
+	"files.exclude": {
+		"*.exe": true,
+		"debug": true
+	}
 }
