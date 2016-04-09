@@ -117,11 +117,11 @@ func (m *Model) Load(isIndexed bool) {
 
 	vertAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, 5*4, gl.PtrOffset(0)) //5:number of values per vertex, 4:number of bytes in a float32
+	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, int32(m.data.VertSize)*4, gl.PtrOffset(0)) //5:number of values per vertex, 4:number of bytes in a float32
 
 	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, 5*4, gl.PtrOffset(3*4)) //5:number of values per vertex, 4:number of bytes in a float32
+	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, int32(m.data.VertSize)*4, gl.PtrOffset(3*4)) //5:number of values per vertex, 4:number of bytes in a float32
 
 	if m.data.Indexed {
 		var indices uint32
@@ -148,4 +148,5 @@ type vertexData struct {
 	Indexed bool      `json:"indexed"`
 	Verts   []float32 `json:"verts"`
 	Indices []uint32  `json:"indices"`
+	VertSize byte `json:"vertSize"`
 }
