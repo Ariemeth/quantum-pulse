@@ -65,7 +65,7 @@ func (m *Model) Render() {
 
 	gl.ActiveTexture(gl.TEXTURE0)
 
-	texture, isLoaded := m.textures.GetTexture("square")
+	texture, isLoaded := m.textures.GetTexture(m.data.TextureFile)
 
 	if isLoaded {
 		gl.BindTexture(gl.TEXTURE_2D, texture)
@@ -76,7 +76,7 @@ func (m *Model) Render() {
 	if m.data.Indexed {
 		gl.DrawElements(gl.TRIANGLE_FAN, int32(len(m.data.Indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
 	} else {
-		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(m.data.Verts))/5)
+		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(m.data.Verts))/m.data.VertSize)
 	}
 
 	gl.BindVertexArray(0)
@@ -104,7 +104,7 @@ func (m *Model) Load(isIndexed bool) {
 	gl.BindFragDataLocation(m.currentProgram, 0, gl.Str("outputColor\x00"))
 
 	// Load the texture
-	m.textures.LoadTexture("assets/textures/square.png", "square")
+	m.textures.LoadTexture(fmt.Sprintf("assets/textures/%s", m.data.TextureFile), m.data.TextureFile)
 
 	// Configure the vertex data
 	gl.GenVertexArrays(1, &m.vao)
@@ -117,11 +117,11 @@ func (m *Model) Load(isIndexed bool) {
 
 	vertAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, int32(m.data.VertSize)*4, gl.PtrOffset(0)) //5:number of values per vertex, 4:number of bytes in a float32
+	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, m.data.VertSize*4, gl.PtrOffset(0)) // 4:number of bytes in a float32
 
 	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, int32(m.data.VertSize)*4, gl.PtrOffset(3*4)) //5:number of values per vertex, 4:number of bytes in a float32
+	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true,m.data.VertSize*4, gl.PtrOffset(3*4)) // 4:number of bytes in a float32
 
 	if m.data.Indexed {
 		var indices uint32
@@ -145,8 +145,9 @@ func (m *Model) LoadFile(fileName string) {
 }
 
 type vertexData struct {
-	Indexed bool      `json:"indexed"`
-	Verts   []float32 `json:"verts"`
-	Indices []uint32  `json:"indices"`
-	VertSize byte `json:"vertSize"`
+	Indexed     bool      `json:"indexed"`
+	Verts       []float32 `json:"verts"`
+	Indices     []uint32  `json:"indices"`
+	VertSize    int32      `json:"vertSize"`
+	TextureFile string    `json:"textureFile"`
 }
