@@ -13,7 +13,7 @@ import (
 const windowWidth = 800
 const windowHeight = 600
 
-//Engine constitutes the rendering engine
+// Engine constitutes the rendering engine
 type Engine struct {
 	window       *glfw.Window
 	shaders      sm.ShaderManager
@@ -23,7 +23,7 @@ type Engine struct {
 	cube         *Model
 }
 
-//Init is called to initialize glfw and opengl
+// Init is called to initialize glfw and opengl
 func (e *Engine) Init() {
 	if err := glfw.Init(); err != nil {
 		log.Fatalln("failed to initialize glfw:", err)
@@ -39,7 +39,7 @@ func (e *Engine) Init() {
 
 }
 
-//Run is runs the main engine loop
+// Run is runs the main engine loop
 func (e *Engine) Run() {
 	defer glfw.Terminate()
 	e.cube = NewModel("cube", e.shaders, e.textures, "simple")
@@ -73,7 +73,7 @@ func (e *Engine) Run() {
 	}
 }
 
-//LoadShaders loads a vertex and fragment shader as a shader program
+// LoadShaders loads a vertex and fragment shader as a shader program
 func (e *Engine) LoadShaders(shader sm.Shader, shouldBeDefault bool) {
 	e.shaders.LoadProgram(shader, shouldBeDefault)
 }
@@ -100,7 +100,7 @@ func createWindow() *glfw.Window {
 	return window
 }
 
-//AddScene adds a scene into the engine
+// AddScene adds a scene into the engine
 func (e *Engine) AddScene(scene Scene, name string) {
 	e.scenes[name] = scene
 }

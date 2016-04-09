@@ -9,7 +9,7 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
-//Shader holds information about a shader program
+// Shader holds information about a shader program
 type Shader struct {
 	VertSrcFile string //file that contains the vertex shader
 	FragSrcFile string //file that contains the fragment shader
@@ -18,27 +18,27 @@ type Shader struct {
 	Name        string //shader name
 }
 
-//shaderManager stores shader programs
+// shaderManager stores shader programs
 type shaderManager struct {
 	programs      map[string]uint32
 	programLock   sync.RWMutex
 	DefaultShader string
 }
 
-//ShaderManager interface is used to interact with the shaderManager
+// ShaderManager interface is used to interact with the shaderManager
 type ShaderManager interface {
 	LoadProgram(Shader, bool)
 	GetShader(key string) (uint32, bool)
 	GetDefaultShader() string
 }
 
-//NewShaderManager creates a new ShaderManager
+// NewShaderManager creates a new ShaderManager
 func NewShaderManager() ShaderManager {
 	sm := shaderManager{programs: make(map[string]uint32)}
 	return &sm
 }
 
-//LoadProgram creates a shader program from a vertex and fragment shader source files.
+// LoadProgram creates a shader program from a vertex and fragment shader source files.
 func (sm *shaderManager) LoadProgram(shader Shader, shouldBeDefault bool) {
 
 	if len(shader.VertSrc) < 1 {
@@ -78,8 +78,8 @@ func (sm *shaderManager) LoadProgram(shader Shader, shouldBeDefault bool) {
 	}
 }
 
-//GetShader returns a program id if the shader program was loaded, if it was not a 0
-//false will be returned
+// GetShader returns a program id if the shader program was loaded, if it was not a 0
+// false will be returned
 func (sm *shaderManager) GetShader(key string) (uint32, bool) {
 
 	sm.programLock.RLock()
@@ -89,7 +89,7 @@ func (sm *shaderManager) GetShader(key string) (uint32, bool) {
 	return program, status
 }
 
-//GetDefaultShader returns the name of the default shader
+// GetDefaultShader returns the name of the default shader
 func (sm *shaderManager) GetDefaultShader() string {
 	return sm.DefaultShader
 }

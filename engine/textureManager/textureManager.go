@@ -12,25 +12,25 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 
-//textureManager stores opengl textures
+// textureManager stores opengl textures
 type textureManager struct {
 	textures    map[string]uint32
 	textureLock sync.RWMutex
 }
 
-//TextureManager interface is used to interact with a textureManager
+// TextureManager interface is used to interact with a textureManager
 type TextureManager interface {
 	LoadTexture(string, string)
 	GetTexture(string) (uint32, bool)
 }
 
-//NewTextureManager creates a new TextureManager
+// NewTextureManager creates a new TextureManager
 func NewTextureManager() TextureManager {
 	tm := textureManager{textures: make(map[string]uint32)}
 	return &tm
 }
 
-//LoadTexture loads a png file into an opengl texture
+// LoadTexture loads a png file into an opengl texture
 func (tm *textureManager) LoadTexture(textureFile, key string) {
 	texture, err := newTexture(textureFile)
 	if err != nil {
@@ -43,8 +43,8 @@ func (tm *textureManager) LoadTexture(textureFile, key string) {
 	tm.textures[key] = texture
 }
 
-//GetTexture returns a texture id if the texture was loaded, if it was not a 0 and
-//false will be returned
+// GetTexture returns a texture id if the texture was loaded, if it was not a 0 and
+// false will be returned
 func (tm *textureManager) GetTexture(key string) (uint32, bool) {
 	tm.textureLock.RLock()
 	defer tm.textureLock.RUnlock()

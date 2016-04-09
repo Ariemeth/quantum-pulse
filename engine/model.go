@@ -9,9 +9,8 @@ import (
 	"github.com/go-gl/mathgl/mgl32"
 )
 
-//Model represents a physical entity
+// Model represents a physical entity
 type Model struct {
-	Entity
 	vertices          []float32
 	indices           []uint32
 	shaders           sm.ShaderManager
@@ -29,10 +28,9 @@ type Model struct {
 	currentTexture    uint32
 }
 
-//NewModel creates a new model
+// NewModel creates a new model
 func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, shader string) *Model {
-	m := Model{
-		Entity:     NewEntity(id),
+	m := Model{		
 		shaders:    shaders,
 		textures:   textures,
 		angle:      0.0,
@@ -52,13 +50,13 @@ func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager, s
 	return &m
 }
 
-//Update updates the model
+// Update updates the model
 func (m *Model) Update(elapsed float64) {
 	m.angle += elapsed
 	m.model = mgl32.HomogRotate3D(float32(m.angle), mgl32.Vec3{0, 1, 0})
 }
 
-//Render renders the model
+// Render renders the model
 func (m *Model) Render() {
 
 	gl.UseProgram(m.currentProgram)
@@ -85,7 +83,7 @@ func (m *Model) Render() {
 	gl.BindVertexArray(0)
 }
 
-//Load loads and sets up the model
+// Load loads and sets up the model
 func (m *Model) Load(isIndexed bool) {
 	gl.UseProgram(m.currentProgram)
 
