@@ -32,7 +32,6 @@ type Model struct {
 	textureUniform    int32
 	vao               uint32
 	currentProgram    uint32
-	currentTexture    uint32
 }
 
 // NewModel creates a new model.
@@ -93,7 +92,7 @@ func (m *Model) Render() {
 // Load loads and sets up the model
 func (m *Model) Load(fileName string) {
 
-	m.LoadFile(fileName)
+	m.loadFile(fileName)
 
 	shader := sm.Shader{VertSrcFile: m.data.VertShaderFile, FragSrcFile: m.data.FragShaderFile, Name: fmt.Sprintf("%s:%s", m.data.VertShaderFile, m.data.FragShaderFile)}
 	program, err := m.shaders.LoadProgram(shader, false)
@@ -150,8 +149,8 @@ func (m *Model) Load(fileName string) {
 	gl.BindVertexArray(0)
 }
 
-// LoadFile loads a model's data from a json file.
-func (m *Model) LoadFile(fileName string) {
+// loadFile loads a model's data from a json file.
+func (m *Model) loadFile(fileName string) {
 	data, err := ioutil.ReadFile(fmt.Sprintf("%s%s", ModelSrcDir, fileName))
 	if err != nil {
 		fmt.Println(err.Error())
