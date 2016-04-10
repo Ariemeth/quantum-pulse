@@ -3,3 +3,4 @@
 [![GoDoc](https://godoc.org/github.com/Ariemeth/quantum-pulse?status.svg)](https://godoc.org/github.com/Ariemeth/quantum-pulse/engine)
 
 
+# Quantum Pulse is a learning project looking into building an Entity Container System using go.
