@@ -68,6 +68,7 @@ func (e *entity) ComponentTypes() []string {
 func (e *entity) Run(quit chan interface{}) {
 	for {
 		select {
+
 		case <-quit:
 			return
 		}

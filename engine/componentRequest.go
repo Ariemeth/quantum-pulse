@@ -12,3 +12,11 @@ type compRequest struct {
 	name    string
 	retChan chan components.Component
 }
+
+func (c compRequest) Name() string {
+	return c.name
+}
+
+func (c compRequest) Channel() chan components.Component {
+	return c.retChan
+}
