@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	sm "github.com/Ariemeth/frame-assault-2/engine/shaderManager"
-	tm "github.com/Ariemeth/frame-assault-2/engine/textureManager"
+	sm "github.com/Ariemeth/quantum-pulse/engine/shaderManager"
+	tm "github.com/Ariemeth/quantum-pulse/engine/textureManager"
 )
 
 const (

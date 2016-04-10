@@ -1,6 +1,6 @@
 package engine
 
-import "github.com/Ariemeth/frame-assault-2/engine/components"
+import "github.com/Ariemeth/quantum-pulse/engine/components"
 
 // EntityOld is the original interface used for entities.  This is being added to allow
 // the current scene and model classes to keep functioning as the system is being redone

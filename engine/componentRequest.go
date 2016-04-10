@@ -1,6 +1,6 @@
 package engine
 
-import "github.com/Ariemeth/frame-assault-2/engine/components"
+import "github.com/Ariemeth/quantum-pulse/engine/components"
 
 // ComponentRequest presents an interface used to request a Component from an Entity.
 type ComponentRequest interface {

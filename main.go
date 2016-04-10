@@ -3,7 +3,7 @@ package main
 import (
 	"runtime"
 
-	"github.com/Ariemeth/frame-assault-2/engine"
+	"github.com/Ariemeth/quantum-pulse/engine"
 )
 
 func init() {

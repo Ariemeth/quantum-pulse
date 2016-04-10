@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	sm "github.com/Ariemeth/frame-assault-2/engine/shaderManager"
-	tm "github.com/Ariemeth/frame-assault-2/engine/textureManager"
+	sm "github.com/Ariemeth/quantum-pulse/engine/shaderManager"
+	tm "github.com/Ariemeth/quantum-pulse/engine/textureManager"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
