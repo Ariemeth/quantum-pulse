@@ -1,4 +1,4 @@
-package engine
+package entity
 
 import "github.com/Ariemeth/quantum-pulse/engine/components"
 
@@ -11,12 +11,17 @@ type ComponentRequest interface {
 type compRequest struct {
 	name    string
 	retChan chan components.Component
+	done    chan interface{}
 }
 
 func (c compRequest) Name() string {
 	return c.name
 }
 
-func (c compRequest) Channel() chan components.Component {
+func (c *compRequest) Channel() chan components.Component {
 	return c.retChan
+}
+
+func (c *compRequest) Done() {
+
 }
