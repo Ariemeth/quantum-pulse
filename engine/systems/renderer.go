@@ -18,7 +18,7 @@ func NewRenderer() System {
 		remove:       make(chan entity.Entity, 0),
 		add:          make(chan entity.Entity, 0),
 		quit:         make(chan interface{}),
-		requirements: []string{""},
+		requirements: []string{""}, //TODO eventually add the actual requirements
 	}
 
 	return &r
