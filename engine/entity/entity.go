@@ -117,8 +117,10 @@ func (e *entity) Start() {
 func (e *entity) Stop() {
 	defer e.runningLock.Unlock()
 	e.runningLock.Lock()
-	e.quit <- true
-	e.isRunning = false
+	if e.isRunning {
+		e.quit <- true
+		e.isRunning = false
+	}
 }
 
 // IsRunning is useful to check if the entity is running its process routine.
