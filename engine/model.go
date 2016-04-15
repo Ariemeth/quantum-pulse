@@ -1,10 +1,9 @@
 package engine
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 
+	"github.com/Ariemeth/quantum-pulse/engine/components"
 	sm "github.com/Ariemeth/quantum-pulse/engine/shaderManager"
 	tm "github.com/Ariemeth/quantum-pulse/engine/textureManager"
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -19,7 +18,7 @@ const (
 // Model represents a physical entity
 type Model struct {
 	id                string
-	data              vertexData
+	meshComp          components.Mesh
 	shaders           sm.ShaderManager
 	textures          tm.TextureManager
 	angle             float64
@@ -38,6 +37,7 @@ type Model struct {
 func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager) *Model {
 	m := Model{
 		id:         id,
+		meshComp:   components.NewMesh(),
 		shaders:    shaders,
 		textures:   textures,
 		angle:      0.0,
@@ -70,20 +70,21 @@ func (m *Model) Render() {
 
 	gl.ActiveTexture(gl.TEXTURE0)
 
-	texture, isLoaded := m.textures.GetTexture(m.data.TextureFile)
+	md := m.meshComp.Data()
+	texture, isLoaded := m.textures.GetTexture(md.TextureFile)
 
 	if isLoaded {
 		gl.BindTexture(gl.TEXTURE_2D, texture)
 	} else {
-		if m.data.TextureFile != "" {
-			go fmt.Printf("Unable to load texture %s", m.data.TextureFile)
+		if md.TextureFile != "" {
+			go fmt.Printf("Unable to load texture %s", md.TextureFile)
 		}
 	}
 
-	if m.data.Indexed {
-		gl.DrawElements(gl.TRIANGLE_FAN, int32(len(m.data.Indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
+	if md.Indexed {
+		gl.DrawElements(gl.TRIANGLE_FAN, int32(len(md.Indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
 	} else {
-		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(m.data.Verts))/m.data.VertSize)
+		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(md.Verts))/md.VertSize)
 	}
 
 	gl.BindVertexArray(0)
@@ -92,9 +93,10 @@ func (m *Model) Render() {
 // Load loads and sets up the model
 func (m *Model) Load(fileName string) {
 
-	m.loadFile(fileName)
+	m.meshComp.Load(fileName)
+	md := m.meshComp.Data()
 
-	shader := sm.Shader{VertSrcFile: m.data.VertShaderFile, FragSrcFile: m.data.FragShaderFile, Name: fmt.Sprintf("%s:%s", m.data.VertShaderFile, m.data.FragShaderFile)}
+	shader := sm.Shader{VertSrcFile: md.VertShaderFile, FragSrcFile: md.FragShaderFile, Name: fmt.Sprintf("%s:%s", md.VertShaderFile, md.FragShaderFile)}
 	program, err := m.shaders.LoadProgram(shader, false)
 	if err != nil {
 		return
@@ -120,7 +122,7 @@ func (m *Model) Load(fileName string) {
 	gl.BindFragDataLocation(m.currentProgram, 0, gl.Str("outputColor\x00"))
 
 	// Load the texture
-	m.textures.LoadTexture(m.data.TextureFile, m.data.TextureFile)
+	m.textures.LoadTexture(md.TextureFile, md.TextureFile)
 
 	// Configure the vertex data
 	gl.GenVertexArrays(1, &m.vao)
@@ -129,43 +131,22 @@ func (m *Model) Load(fileName string) {
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(m.data.Verts)*4, gl.Ptr(m.data.Verts), gl.STATIC_DRAW)
+	gl.BufferData(gl.ARRAY_BUFFER, len(md.Verts)*4, gl.Ptr(md.Verts), gl.STATIC_DRAW)
 
 	vertAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vert\x00")))
 	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, m.data.VertSize*4, gl.PtrOffset(0)) // 4:number of bytes in a float32
+	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, md.VertSize*4, gl.PtrOffset(0)) // 4:number of bytes in a float32
 
 	texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
 	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, m.data.VertSize*4, gl.PtrOffset(3*4)) // 4:number of bytes in a float32
+	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, md.VertSize*4, gl.PtrOffset(3*4)) // 4:number of bytes in a float32
 
-	if m.data.Indexed {
+	if md.Indexed {
 		var indices uint32
 		gl.GenBuffers(1, &indices)
 		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices)
-		gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(m.data.Indices)*4, gl.Ptr(m.data.Indices), gl.STATIC_DRAW)
+		gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(md.Indices)*4, gl.Ptr(md.Indices), gl.STATIC_DRAW)
 	}
 
 	gl.BindVertexArray(0)
-}
-
-// loadFile loads a model's data from a json file.
-func (m *Model) loadFile(fileName string) {
-	data, err := ioutil.ReadFile(fmt.Sprintf("%s%s", ModelSrcDir, fileName))
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
-	json.Unmarshal(data, &m.data)
-}
-
-type vertexData struct {
-	Indexed        bool      `json:"indexed"`
-	Verts          []float32 `json:"verts"`
-	Indices        []uint32  `json:"indices"`
-	VertSize       int32     `json:"vertSize"`
-	TextureFile    string    `json:"textureFile"`
-	FragShaderFile string    `json:"fragShaderFile"`
-	VertShaderFile string    `json:"vertShaderFile"`
 }
