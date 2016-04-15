@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"sync"
 )
 
@@ -19,8 +20,8 @@ const (
 type Mesh interface {
 	// Data retrieves the mesh data.
 	Data() MeshData
-	// Update updates the mesh data with the new data passed in as a parameter.
-	Update(MeshData)
+	// Set updates the mesh data with the new data passed in as a parameter.
+	Set(MeshData)
 	// Load loads the mesh data from file.
 	Load(string) error
 }
@@ -49,8 +50,8 @@ func (m *mesh) Data() MeshData {
 	return m.data
 }
 
-// Update sets the MeshData to the new data.
-func (m *mesh) Update(md MeshData) {
+// Set sets the MeshData to the new data.
+func (m *mesh) Set(md MeshData) {
 	m.dataLock.Lock()
 	defer m.dataLock.Unlock()
 	m.data = md
@@ -65,7 +66,14 @@ func (m *mesh) Load(fileName string) error {
 		return errors.New("Already Loaded")
 	}
 
-	data, err := ioutil.ReadFile(fmt.Sprintf("%s%s", MeshSrcDir, fileName))
+	fullFileName := ""
+	if strings.Contains(fileName, MeshSrcDir) {
+		fullFileName = fileName
+	} else {
+		fullFileName = fmt.Sprintf("%s%s", MeshSrcDir, fileName)
+	}
+
+	data, err := ioutil.ReadFile(fullFileName)
 	if err != nil {
 		fmt.Println(err.Error())
 		return err

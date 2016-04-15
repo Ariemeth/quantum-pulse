@@ -19,10 +19,10 @@ const (
 type Model struct {
 	id                string
 	meshComp          components.Mesh
+	transform         components.Transform
 	shaders           sm.ShaderManager
 	textures          tm.TextureManager
 	angle             float64
-	model             mgl32.Mat4
 	camera            mgl32.Mat4
 	projection        mgl32.Mat4
 	modelUniform      int32
@@ -38,10 +38,10 @@ func NewModel(id string, shaders sm.ShaderManager, textures tm.TextureManager) *
 	m := Model{
 		id:         id,
 		meshComp:   components.NewMesh(),
+		transform:  components.NewTransform(),
 		shaders:    shaders,
 		textures:   textures,
 		angle:      0.0,
-		model:      mgl32.Ident4(),
 		camera:     mgl32.Ident4(),
 		projection: mgl32.Ident4(),
 	}
@@ -57,14 +57,15 @@ func (m Model) ID() string {
 // Update updates the model
 func (m *Model) Update(elapsed float64) {
 	m.angle += elapsed
-	m.model = mgl32.HomogRotate3D(float32(m.angle), mgl32.Vec3{0, 1, 0})
+	m.transform.Set(mgl32.HomogRotate3D(float32(m.angle), mgl32.Vec3{0, 1, 0}))
 }
 
 // Render renders the model
 func (m *Model) Render() {
 
 	gl.UseProgram(m.currentProgram)
-	gl.UniformMatrix4fv(m.modelUniform, 1, false, &m.model[0])
+	td := m.transform.Data()
+	gl.UniformMatrix4fv(m.modelUniform, 1, false, &td[0])
 
 	gl.BindVertexArray(m.vao)
 
@@ -114,7 +115,8 @@ func (m *Model) Load(fileName string) {
 	gl.UniformMatrix4fv(m.cameraUniform, 1, false, &m.camera[0])
 
 	m.modelUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("model\x00"))
-	gl.UniformMatrix4fv(m.modelUniform, 1, false, &m.model[0])
+	td := m.transform.Data()
+	gl.UniformMatrix4fv(m.modelUniform, 1, false, &td[0])
 
 	m.textureUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("tex\x00"))
 	gl.Uniform1i(m.textureUniform, 0)
