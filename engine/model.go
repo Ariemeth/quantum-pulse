@@ -17,18 +17,14 @@ const (
 
 // Model represents a physical entity
 type Model struct {
-	id         string
-	meshComp   components.Mesh
-	transform  components.Transform
-	shaders    sm.ShaderManager
-	textures   tm.TextureManager
-	angle      float64
-	camera     mgl32.Mat4
-	projection mgl32.Mat4
-	//	modelUniform      int32
-	//	projectionUniform int32
-	//	cameraUniform     int32
-	//	textureUniform    int32
+	id             string
+	meshComp       components.Mesh
+	transform      components.Transform
+	shaders        sm.ShaderManager
+	textures       tm.TextureManager
+	angle          float64
+	camera         mgl32.Mat4
+	projection     mgl32.Mat4
 	vao            uint32
 	currentProgram uint32
 	program        sm.ShaderProgram
