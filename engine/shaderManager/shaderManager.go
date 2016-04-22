@@ -30,7 +30,7 @@ type ShaderManager interface {
 	// GetShader returns a program id if the shader program was loaded.
 	GetShader(key string) (ShaderProgram, bool)
 	// GetDefaultShader returns the name of the default shader.
-	GetDefaultShader() string
+	GetDefaultShader() ShaderProgram
 }
 
 // NewShaderManager creates a new ShaderManager
@@ -100,8 +100,9 @@ func (sm *shaderManager) GetShader(key string) (ShaderProgram, bool) {
 }
 
 // GetDefaultShader returns the name of the default shader.
-func (sm *shaderManager) GetDefaultShader() string {
-	return sm.DefaultShader
+func (sm *shaderManager) GetDefaultShader() ShaderProgram {
+	s, _ := sm.GetShader(sm.DefaultShader)
+	return s
 }
 
 func loadShaderFile(fileName string) (string, error) {
