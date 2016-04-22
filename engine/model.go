@@ -102,17 +102,9 @@ func (m *Model) Load(fileName string) {
 	if err != nil {
 		return
 	}
+	m.program = program
 	m.currentProgram = program.ProgramID()
-	/*
-		m.projectionUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("projection\x00"))
-		m.cameraUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("camera\x00"))
-		m.modelUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("model\x00"))
-		m.textureUniform = gl.GetUniformLocation(m.currentProgram, gl.Str("tex\x00"))
-		gl.BindFragDataLocation(m.currentProgram, 0, gl.Str("outputColor\x00"))
 
-		vertAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vert\x00")))
-		texCoordAttrib := uint32(gl.GetAttribLocation(m.currentProgram, gl.Str("vertTexCoord\x00")))
-	*/
 	gl.UseProgram(m.currentProgram)
 
 	m.projection = mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
