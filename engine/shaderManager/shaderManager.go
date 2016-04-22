@@ -88,7 +88,7 @@ func (sm *shaderManager) LoadProgramFromSrc(vertSrc string, fragSrc string, name
 	return program, nil
 }
 
-// GetShader returns a program id if the shader program was loaded, if it was not a 0
+// GetShader returns a ShaderProgram if the shader program was loaded, if it was not nil and
 // false will be returned.
 func (sm *shaderManager) GetShader(key string) (ShaderProgram, bool) {
 

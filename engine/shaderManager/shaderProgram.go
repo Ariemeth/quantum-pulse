@@ -8,11 +8,17 @@ import (
 )
 
 const (
-	CameraUniform          = "camera"
-	ProjectionUniform      = "projection"
-	ModelUniform           = "model"
-	TextureUniform         = "tex"
-	VertexAttribute        = "vert"
+	// CameraUniform is the expected name of view matrix uniform in the shader.
+	CameraUniform = "camera"
+	// ProjectionUniform is the expected name of the projection matrix uniform in the shader.
+	ProjectionUniform = "projection"
+	// ModelUniform is the expected name of the model matrix uniform in the shader.
+	ModelUniform = "model"
+	// TextureUniform is the expected name of the texture uniform in the shader.
+	TextureUniform = "tex"
+	// VertexAttribute is the expected name of the vertex data attribute in the shader.
+	VertexAttribute = "vert"
+	// VertexTexCordAttribute is the expected name of the vertex texture coordinates attribute in the shader.
 	VertexTexCordAttribute = "vertTexCoord"
 )
 
@@ -26,9 +32,13 @@ type shaderProgram struct {
 
 // ShaderProgram represents the behaviors needed to access a shader and its variables.
 type ShaderProgram interface {
+	// GetUniformLoc retrieves the shader location of the specified uniform.
 	GetUniformLoc(name string) int32
+	// GetAttribLoc retrieves the shader location of a the specified attribute.
 	GetAttribLoc(name string) uint32
+	// GetName retrieves the name of the shader program.
 	GetName() string
+	// ProgramID retrieves the program id of the shader program.
 	ProgramID() uint32
 }
 
@@ -53,6 +63,7 @@ func NewShaderProgram(name string, vertSrc, fragSrc string) (ShaderProgram, erro
 	return &sp, nil
 }
 
+// GetUniformLoc retrieves the shader location of the specified uniform.
 func (sp *shaderProgram) GetUniformLoc(name string) int32 {
 	u, ok := sp.uniforms[name]
 	if !ok {
@@ -61,6 +72,7 @@ func (sp *shaderProgram) GetUniformLoc(name string) int32 {
 	return u
 }
 
+// GetAttribLoc retrieves the shader location of a the specified attribute.
 func (sp *shaderProgram) GetAttribLoc(name string) uint32 {
 	a, ok := sp.attributes[name]
 	if !ok {
@@ -69,9 +81,12 @@ func (sp *shaderProgram) GetAttribLoc(name string) uint32 {
 	return a
 }
 
+// GetName retrieves the name of the shader program.
 func (sp *shaderProgram) GetName() string {
 	return sp.name
 }
+
+// ProgramID retrieves the program id of the shader program.
 func (sp *shaderProgram) ProgramID() uint32 {
 	return sp.id
 }
