@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/Ariemeth/quantum-pulse/engine/components"
@@ -10,44 +11,31 @@ import (
 type Entity interface {
 	// ID retrieves the id of this entity.
 	ID() string
-	// AddComponent adds a component to the entity.
-	AddComponent(components.Component)
-	// RemoveComponent removes a component from the entity.
-	RemoveComponent(components.Component)
-	// Component accepts a ComponentRequest and returns a component to the channel in the request.  If the Component is not loaded on the entity the receiving channel will receive a nil value.
-	Component(ComponentRequest)
-	// Start will start main go routine for the entity.  This routine is expected to wait for various channel inputs and act acordingly.
-	Start()
-	// Stop Will stop the entities main processing routine.
-	Stop()
-	// IsRunning is useful to check if the entity is running its process routine.
-	IsRunning() bool
+	// AddComponent adds a component to the entity.  Returns an error if the component type has already been added.
+	AddComponent(components.Component) error
+	// RemoveComponent removes a component from the entity.  If the component type is not already attached an error will be returned.
+	RemoveComponent(string) error
+	// ReplaceComponent replaces an existing component with a new one of the same type.
+	ReplaceComponent(c components.Component) error
+	// Component retrieves a component based on its component type.
+	Component(string) components.Component
+	// Retrieves a list of component types that have been attached to this entity.
+	ComponentTypes() []string
 }
 
 // NewEntity creates a new entity with the given ID.
 func NewEntity(id string) Entity {
 	ent := entity{
-		id:          id,
-		components:  make(map[string]components.Component),
-		compRequest: make(chan ComponentRequest, 0),
-		remove:      make(chan components.Component, 0),
-		add:         make(chan components.Component, 0),
-		replace:     make(chan components.Component, 0),
-		quit:        make(chan interface{}),
+		id:         id,
+		components: make(map[string]components.Component),
 	}
 	return &ent
 }
 
 type entity struct {
-	id          string
-	components  map[string]components.Component
-	compRequest chan ComponentRequest
-	remove      chan components.Component
-	add         chan components.Component
-	replace     chan components.Component
-	quit        chan interface{}
-	runningLock sync.Mutex
-	isRunning   bool
+	id         string
+	components map[string]components.Component
+	lock       sync.RWMutex
 }
 
 // ID retrieves the id of this entity.
@@ -55,77 +43,53 @@ func (e *entity) ID() string {
 	return e.id
 }
 
-// AddComponent adds a component to the entity.
-func (e *entity) AddComponent(c components.Component) {
-	e.add <- c
+// AddComponent adds a component to the entity.  Returns an error if the component type has already been added.
+func (e *entity) AddComponent(c components.Component) error {
+	e.lock.Lock()
+	defer e.lock.Unlock()
+	if _, ok := e.components[c.ComponentType()]; !ok {
+		e.components[c.ComponentType()] = c
+		return nil
+	}
+	return errors.New("Component type already attached.")
 }
 
 // RemoveComponent removes a component from the entity.
-func (e *entity) RemoveComponent(c components.Component) {
-	e.remove <- c
+func (e *entity) RemoveComponent(compType string) error {
+	e.lock.Lock()
+	defer e.lock.Unlock()
+	if _, ok := e.components[compType]; ok {
+		delete(e.components, compType)
+		return nil
+	}
+	return errors.New("Component type not attached.")
 }
 
-// Component accepts a ComponentRequest and returns a component to the channel in the request.  If the Component is not loaded on the entity the receiving channel will receive a nil value.
-func (e *entity) ReplaceComponent(c components.Component) {
-	e.replace <- c
+// ReplaceComponent replaces an existing component with a new one of the same type.  If the component type has not already been attached returns an error.
+func (e *entity) ReplaceComponent(c components.Component) error {
+	e.lock.Lock()
+	defer e.lock.Unlock()
+	if _, ok := e.components[c.ComponentType()]; ok {
+		e.components[c.ComponentType()] = c
+		return nil
+	}
+	return errors.New("Component type not already attached.")
 }
 
-// Start will start main go routine for the entity.  This routine is expected to wait for various channel inputs and act acordingly.
-func (e *entity) Component(request ComponentRequest) {
-	e.compRequest <- request
+// Component retrieves a component based on its component type.
+func (e *entity) Component(compType string) components.Component {
+	e.lock.RLock()
+	defer e.lock.RUnlock()
+	return e.components[compType]
 }
 
+// Retrieves a list of component types that have been attached to this entity.
 func (e *entity) ComponentTypes() []string {
+	e.lock.RLock()
+	defer e.lock.RUnlock()
 	t := make([]string, len(e.components))
 	for k := range e.components {
 		t = append(t, k)
 	}
 	return t
-}
-
-// Start will start main go routine for the entity.  This routine is expected to wait for various channel inputs and act acordingly.
-func (e *entity) Start() {
-	defer e.runningLock.Unlock()
-	e.runningLock.Lock()
-
-	if e.isRunning {
-		return
-	}
-	e.isRunning = true
-
-	go func() {
-		for {
-			select {
-			case req := <-e.compRequest:
-				req.Channel() <- e.components[req.Name()]
-			case comp := <-e.add:
-				if _, ok := e.components[comp.ComponentType()]; !ok {
-					e.components[comp.ComponentType()] = comp
-				}
-			case comp := <-e.remove:
-				delete(e.components, comp.ComponentType())
-			case comp := <-e.replace:
-				e.components[comp.ComponentType()] = comp
-			case <-e.quit:
-				return
-			}
-		}
-	}()
-}
-
-// Stop Will stop the entities main processing routine.
-func (e *entity) Stop() {
-	defer e.runningLock.Unlock()
-	e.runningLock.Lock()
-	if e.isRunning {
-		e.quit <- true
-		e.isRunning = false
-	}
-}
-
-// IsRunning is useful to check if the entity is running its process routine.
-func (e *entity) IsRunning() bool {
-	defer e.runningLock.Unlock()
-	e.runningLock.Lock()
-	return e.isRunning
 }
