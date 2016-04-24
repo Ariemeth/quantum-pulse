@@ -17,17 +17,18 @@ const (
 
 // Model represents a physical entity
 type Model struct {
-	id             string
-	meshComp       components.Mesh
-	transform      components.Transform
-	shaders        sm.ShaderManager
-	textures       tm.TextureManager
-	angle          float64
-	camera         mgl32.Mat4
-	projection     mgl32.Mat4
-	vao            uint32
-	currentProgram uint32
-	program        sm.ShaderProgram
+	id         string
+	meshComp   components.Mesh
+	transform  components.Transform
+	shader     components.Shader
+	shaders    sm.ShaderManager
+	textures   tm.TextureManager
+	angle      float64
+	camera     mgl32.Mat4
+	projection mgl32.Mat4
+	vao        uint32
+	//currentProgram uint32
+	//	program        components.Shader
 }
 
 // NewModel creates a new model.
@@ -60,9 +61,9 @@ func (m *Model) Update(elapsed float64) {
 // Render renders the model
 func (m *Model) Render() {
 
-	gl.UseProgram(m.currentProgram)
+	gl.UseProgram(m.shader.ProgramID())
 	td := m.transform.Data()
-	gl.UniformMatrix4fv(m.program.GetUniformLoc(sm.ModelUniform), 1, false, &td[0])
+	gl.UniformMatrix4fv(m.shader.GetUniformLoc(components.ModelUniform), 1, false, &td[0])
 
 	gl.BindVertexArray(m.vao)
 
@@ -94,30 +95,35 @@ func (m *Model) Load(fileName string) {
 	m.meshComp.Load(fileName)
 	md := m.meshComp.Data()
 
-	program, err := m.shaders.LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, fmt.Sprintf("%s:%s", md.VertShaderFile, md.FragShaderFile), false)
+	shader, err := m.shaders.LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, fmt.Sprintf("%s:%s", md.VertShaderFile, md.FragShaderFile), false)
 	if err != nil {
 		return
 	}
-	m.program = program
-	m.currentProgram = program.ProgramID()
-
-	gl.UseProgram(m.currentProgram)
-
-	m.projection = mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
-	gl.UniformMatrix4fv(m.program.GetUniformLoc(sm.ProjectionUniform), 1, false, &m.projection[0])
-
-	m.camera = mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-	gl.UniformMatrix4fv(m.program.GetUniformLoc(sm.CameraUniform), 1, false, &m.camera[0])
-
-	td := m.transform.Data()
-	gl.UniformMatrix4fv(m.program.GetUniformLoc(sm.ModelUniform), 1, false, &td[0])
-
-	gl.Uniform1i(m.program.GetUniformLoc(sm.TextureUniform), 0)
+	m.shader = shader
 
 	// Load the texture
 	m.textures.LoadTexture(md.TextureFile, md.TextureFile)
 
-	// Configure the vertex data
+	// Load the uniforms
+	gl.UseProgram(m.shader.ProgramID())
+
+	// Load the perspective matrix into a shader uniform
+	// TODO this should be pulled out of the model Load method
+	m.projection = mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
+	gl.UniformMatrix4fv(m.shader.GetUniformLoc(components.ProjectionUniform), 1, false, &m.projection[0])
+
+	// Load the camera matrix into a shader
+	// TODO this should be pulled out of the model Load method
+	m.camera = mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
+	gl.UniformMatrix4fv(m.shader.GetUniformLoc(components.CameraUniform), 1, false, &m.camera[0])
+
+	// Load the model vertex data.
+	td := m.transform.Data()
+	gl.UniformMatrix4fv(m.shader.GetUniformLoc(components.ModelUniform), 1, false, &td[0])
+
+	gl.Uniform1i(m.shader.GetUniformLoc(components.TextureUniform), 0)
+
+	// Configure vertex array object with the model's data
 	gl.GenVertexArrays(1, &m.vao)
 	gl.BindVertexArray(m.vao)
 
@@ -126,11 +132,11 @@ func (m *Model) Load(fileName string) {
 	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
 	gl.BufferData(gl.ARRAY_BUFFER, len(md.Verts)*4, gl.Ptr(md.Verts), gl.STATIC_DRAW)
 
-	vertAttrib := program.GetAttribLoc(sm.VertexAttribute)
+	vertAttrib := m.shader.GetAttribLoc(components.VertexAttribute)
 	gl.EnableVertexAttribArray(vertAttrib)
 	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, md.VertSize*4, gl.PtrOffset(0)) // 4:number of bytes in a float32
 
-	texCoordAttrib := program.GetAttribLoc(sm.VertexTexCordAttribute)
+	texCoordAttrib := m.shader.GetAttribLoc(components.VertexTexCordAttribute)
 	gl.EnableVertexAttribArray(texCoordAttrib)
 	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, md.VertSize*4, gl.PtrOffset(3*4)) // 4:number of bytes in a float32
 

@@ -1,4 +1,4 @@
-package shaderManager
+package components
 
 import (
 	"fmt"
@@ -8,6 +8,8 @@ import (
 )
 
 const (
+	// ComponentTypeShader represents a shaders components type.
+	ComponentTypeShader = "shader"
 	// CameraUniform is the expected name of view matrix uniform in the shader.
 	CameraUniform = "camera"
 	// ProjectionUniform is the expected name of the projection matrix uniform in the shader.
@@ -24,16 +26,16 @@ const (
 	ShaderOutputColor = "outputColor"
 )
 
-// shaderProgram holds information about a shader program
-type shaderProgram struct {
+// shader holds information about a shader program
+type shader struct {
 	uniforms   map[string]int32
 	attributes map[string]uint32
 	name       string //shader name
 	id         uint32
 }
 
-// ShaderProgram represents the behaviors needed to access a shader and its variables.
-type ShaderProgram interface {
+// Shader represents the behaviors needed to access a shader and its variables.
+type Shader interface {
 	// GetUniformLoc retrieves the shader location of the specified uniform.
 	GetUniformLoc(name string) int32
 	// GetAttribLoc retrieves the shader location of a the specified attribute.
@@ -44,9 +46,9 @@ type ShaderProgram interface {
 	ProgramID() uint32
 }
 
-// NewShaderProgram creates a new shader program and populates the uniform and attribute layouts.
-func NewShaderProgram(name string, vertSrc, fragSrc string) (ShaderProgram, error) {
-	sp := shaderProgram{
+// NewShader creates a new shader program and populates the uniform and attribute layouts.
+func NewShader(name string, vertSrc, fragSrc string) (Shader, error) {
+	s := shader{
 		uniforms:   make(map[string]int32),
 		attributes: make(map[string]uint32),
 		name:       name,
@@ -58,16 +60,21 @@ func NewShaderProgram(name string, vertSrc, fragSrc string) (ShaderProgram, erro
 		return nil, err
 	}
 
-	sp.id = program
+	s.id = program
 
-	sp.populateLocations()
+	s.populateLocations()
 
-	return &sp, nil
+	return &s, nil
+}
+
+// ComponentType is expected to return a string representing the type of component.
+func (s *shader) ComponentType() string {
+	return ComponentTypeShader
 }
 
 // GetUniformLoc retrieves the shader location of the specified uniform.
-func (sp *shaderProgram) GetUniformLoc(name string) int32 {
-	u, ok := sp.uniforms[name]
+func (s *shader) GetUniformLoc(name string) int32 {
+	u, ok := s.uniforms[name]
 	if !ok {
 		return -1
 	}
@@ -75,8 +82,8 @@ func (sp *shaderProgram) GetUniformLoc(name string) int32 {
 }
 
 // GetAttribLoc retrieves the shader location of a the specified attribute.
-func (sp *shaderProgram) GetAttribLoc(name string) uint32 {
-	a, ok := sp.attributes[name]
+func (s *shader) GetAttribLoc(name string) uint32 {
+	a, ok := s.attributes[name]
 	if !ok {
 		return 0
 	}
@@ -84,25 +91,25 @@ func (sp *shaderProgram) GetAttribLoc(name string) uint32 {
 }
 
 // GetName retrieves the name of the shader program.
-func (sp *shaderProgram) GetName() string {
-	return sp.name
+func (s *shader) GetName() string {
+	return s.name
 }
 
 // ProgramID retrieves the program id of the shader program.
-func (sp *shaderProgram) ProgramID() uint32 {
-	return sp.id
+func (s *shader) ProgramID() uint32 {
+	return s.id
 }
 
-func (sp *shaderProgram) populateLocations() {
-	program := sp.ProgramID()
+func (s *shader) populateLocations() {
+	program := s.ProgramID()
 
-	sp.uniforms[ProjectionUniform] = gl.GetUniformLocation(program, gl.Str(fmt.Sprintf("%s\x00", ProjectionUniform)))
-	sp.uniforms[CameraUniform] = gl.GetUniformLocation(program, gl.Str(fmt.Sprintf("%s\x00", CameraUniform)))
-	sp.uniforms[ModelUniform] = gl.GetUniformLocation(program, gl.Str(fmt.Sprintf("%s\x00", ModelUniform)))
-	sp.uniforms[TextureUniform] = gl.GetUniformLocation(program, gl.Str(fmt.Sprintf("%s\x00", TextureUniform)))
+	s.uniforms[ProjectionUniform] = gl.GetUniformLocation(program, gl.Str(fmt.Sprintf("%s\x00", ProjectionUniform)))
+	s.uniforms[CameraUniform] = gl.GetUniformLocation(program, gl.Str(fmt.Sprintf("%s\x00", CameraUniform)))
+	s.uniforms[ModelUniform] = gl.GetUniformLocation(program, gl.Str(fmt.Sprintf("%s\x00", ModelUniform)))
+	s.uniforms[TextureUniform] = gl.GetUniformLocation(program, gl.Str(fmt.Sprintf("%s\x00", TextureUniform)))
 
-	sp.attributes[VertexAttribute] = uint32(gl.GetAttribLocation(program, gl.Str(fmt.Sprintf("%s\x00", VertexAttribute))))
-	sp.attributes[VertexTexCordAttribute] = uint32(gl.GetAttribLocation(program, gl.Str(fmt.Sprintf("%s\x00", VertexTexCordAttribute))))
+	s.attributes[VertexAttribute] = uint32(gl.GetAttribLocation(program, gl.Str(fmt.Sprintf("%s\x00", VertexAttribute))))
+	s.attributes[VertexTexCordAttribute] = uint32(gl.GetAttribLocation(program, gl.Str(fmt.Sprintf("%s\x00", VertexTexCordAttribute))))
 
 	gl.BindFragDataLocation(program, 0, gl.Str(fmt.Sprintf("%s\x00", ShaderOutputColor)))
 }
