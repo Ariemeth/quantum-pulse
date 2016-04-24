@@ -24,19 +24,18 @@ func (m *Model) AddMesh(mesh components.Mesh) {
 	m.meshComp = mesh
 }
 func (m *Model) AddShader(shader components.Shader) {
-	shader.LoadMesh(m.meshComp)
-	shader.LoadTransform(m.transform)
-	gl.Uniform1i(shader.GetUniformLoc(components.TextureUniform), 0)
 	m.shader = shader
+}
+
+func (m *Model) AddTransform(transform components.Transform) {
+	m.transform = transform
 }
 
 // NewModel creates a new model.
 func NewModel(id string) *Model {
 	m := Model{
-		id:        id,
-		meshComp:  components.NewMesh(),
-		transform: components.NewTransform(),
-		angle:     0.0,
+		id:    id,
+		angle: 0.0,
 	}
 
 	return &m

@@ -51,7 +51,9 @@ type Shader interface {
 	LoadTransform(Transform)
 	// LoadMesh loads the mesh data onto the gpu.
 	LoadMesh(Mesh)
+	// AddTexture adds the texture id to use with this shader.
 	AddTexture(uint32)
+	// GetTexture retrieves the texture id to use with this shader.
 	GetTexture() (uint32, bool)
 }
 
@@ -151,6 +153,7 @@ func (s *shader) LoadMesh(m Mesh) {
 
 func (s *shader) AddTexture(texture uint32) {
 	s.texture = texture
+	gl.Uniform1i(s.GetUniformLoc(TextureUniform), 0)
 }
 func (s *shader) GetTexture() (uint32, bool) {
 	if s.texture >= 999999 {

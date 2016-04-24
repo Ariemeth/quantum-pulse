@@ -106,6 +106,10 @@ func (s *scene) loadSceneFile(fileName string) {
 		}
 		m.AddMesh(mesh)
 
+		// Load a transform
+		t := components.NewTransform()
+		m.AddTransform(t)
+
 		// Load the shader
 		md := mesh.Data()
 		shaderName := fmt.Sprintf("%s:%s", md.VertShaderFile, md.FragShaderFile)
@@ -115,6 +119,8 @@ func (s *scene) loadSceneFile(fileName string) {
 			continue
 		}
 		shader := components.NewShader(shaderName, program)
+		shader.LoadMesh(mesh)
+		shader.LoadTransform(t)
 		m.AddShader(shader)
 
 		// Load textures
