@@ -31,7 +31,8 @@ type shader struct {
 	uniforms   map[string]int32
 	attributes map[string]uint32
 	name       string //shader name
-	id         uint32
+	program    uint32
+	vao        uint32
 }
 
 // Shader represents the behaviors needed to access a shader and its variables.
@@ -60,7 +61,7 @@ func NewShader(name string, vertSrc, fragSrc string) (Shader, error) {
 		return nil, err
 	}
 
-	s.id = program
+	s.program = program
 
 	s.populateLocations()
 
@@ -97,7 +98,7 @@ func (s *shader) GetName() string {
 
 // ProgramID retrieves the program id of the shader program.
 func (s *shader) ProgramID() uint32 {
-	return s.id
+	return s.program
 }
 
 func (s *shader) populateLocations() {
