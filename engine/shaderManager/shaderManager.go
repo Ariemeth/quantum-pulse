@@ -70,8 +70,6 @@ func (sm *shaderManager) LoadProgramFromSrc(vertSrc string, fragSrc string, name
 		fragSrc = fragSrc + "\x00"
 	}
 
-	//		program, err := newProgram(vertSrc, fragSrc)
-
 	program, err := NewShaderProgram(name, vertSrc, fragSrc)
 	if err != nil {
 		fmt.Println(err)
