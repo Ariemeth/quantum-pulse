@@ -25,8 +25,8 @@ type textureManager struct {
 
 // TextureManager interface is used to interact with a textureManager
 type TextureManager interface {
-	// LoadTexture loads a png file into an opengl texture.
-	LoadTexture(filePath string, key string)
+	// LoadTexture loads a png file into an opengl texture and returns the texture id.
+	LoadTexture(filePath string, key string) (uint32, error)
 	// GetTexture returns a texture id if the texture was loaded.
 	GetTexture(key string) (texture uint32, isFound bool)
 }
@@ -38,16 +38,17 @@ func NewTextureManager() TextureManager {
 }
 
 // LoadTexture loads a png file into an opengl texture
-func (tm *textureManager) LoadTexture(textureFile, key string) {
+func (tm *textureManager) LoadTexture(textureFile, key string) (uint32, error) {
 	texture, err := newTexture(textureFile)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return 0, fmt.Errorf("Unable to load texture file %s", textureFile)
 	}
 
 	tm.textureLock.Lock()
 	defer tm.textureLock.Unlock()
 	tm.textures[key] = texture
+	return texture, nil
 }
 
 // GetTexture returns a texture id if the texture was loaded, if it was not a 0 and

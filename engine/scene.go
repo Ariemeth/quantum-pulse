@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/Ariemeth/quantum-pulse/engine/components"
 	sm "github.com/Ariemeth/quantum-pulse/engine/shaderManager"
 	tm "github.com/Ariemeth/quantum-pulse/engine/textureManager"
+	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/mathgl/mgl32"
 )
 
 const (
@@ -20,6 +23,8 @@ type scene struct {
 	fileName    string
 	shaders     sm.ShaderManager
 	textures    tm.TextureManager
+	camera      mgl32.Mat4
+	projection  mgl32.Mat4
 }
 
 // Scene represents a logical grouping of entities
@@ -36,7 +41,13 @@ func NewScene(fileName string, shaders sm.ShaderManager, textures tm.TextureMana
 		Renderables: make(map[string]Renderable),
 		shaders:     shaders,
 		textures:    textures,
+		camera:      mgl32.Ident4(),
+		projection:  mgl32.Ident4(),
 	}
+
+	scene.projection = mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
+
+	scene.camera = mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
 
 	scene.loadSceneFile(fileName)
 
@@ -84,10 +95,45 @@ func (s *scene) loadSceneFile(fileName string) {
 	json.Unmarshal(data, &sd)
 
 	for _, modelFile := range sd.Models {
-		m := NewModel(modelFile.Name, s.shaders, s.textures)
-		m.Load(modelFile.Name)
+		m := NewModel(modelFile.Name)
+
+		// Load the mesh
+		mesh := components.NewMesh()
+		err := mesh.Load(modelFile.FileName)
+		if err != nil {
+			fmt.Printf("Unable to load mesh:%s", modelFile.FileName)
+			continue
+		}
+		m.AddMesh(mesh)
+
+		// Load the shader
+		md := mesh.Data()
+		shaderName := fmt.Sprintf("%s:%s", md.VertShaderFile, md.FragShaderFile)
+		program, err := s.shaders.LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, shaderName, false)
+		if err != nil {
+			fmt.Printf("Unable to load shader:%s", shaderName)
+			continue
+		}
+		shader := components.NewShader(shaderName, program)
+		m.AddShader(shader)
+
+		// Load textures
+		texture, err := s.textures.LoadTexture(md.TextureFile, md.TextureFile)
+		if err != nil {
+			fmt.Printf("Unable to load texture:%s", md.TextureFile)
+			continue
+		}
+		shader.AddTexture(texture)
+
+		//TODO this really only needs to be done once per shader
+		gl.UniformMatrix4fv(shader.GetUniformLoc(components.ProjectionUniform), 1, false, &s.projection[0])
+
+		//TODO this really only needs to be done once per shader
+		gl.UniformMatrix4fv(shader.GetUniformLoc(components.CameraUniform), 1, false, &s.camera[0])
+
 		s.AddEntity(m)
 	}
+
 }
 
 type sceneData struct {
@@ -96,5 +142,6 @@ type sceneData struct {
 
 type sceneModels struct {
 	Name     string    `json:"name"`
+	FileName string    `json:"fileName"`
 	Position []float32 `json:"position"`
 }

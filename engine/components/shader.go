@@ -29,6 +29,7 @@ const (
 type shader struct {
 	uniforms   map[string]int32
 	attributes map[string]uint32
+	texture    uint32
 	name       string //shader name
 	program    uint32
 	vao        uint32
@@ -47,9 +48,11 @@ type Shader interface {
 	// ProgramID retrieves the program id of the shader program.
 	ProgramID() uint32
 	// LoadTransform loads the transform matrix onto the gpu.
-	LoadTransform(t Transform)
+	LoadTransform(Transform)
 	// LoadMesh loads the mesh data onto the gpu.
 	LoadMesh(Mesh)
+	AddTexture(uint32)
+	GetTexture() (uint32, bool)
 }
 
 // NewShader creates a new shader program and populates the uniform and attribute layouts.
@@ -59,6 +62,7 @@ func NewShader(name string, shaderProgram uint32) Shader {
 		attributes: make(map[string]uint32),
 		name:       name,
 		program:    shaderProgram,
+		texture:    999999,
 	}
 
 	s.storeLocations()
@@ -145,8 +149,19 @@ func (s *shader) LoadMesh(m Mesh) {
 	gl.BindVertexArray(0)
 }
 
+func (s *shader) AddTexture(texture uint32) {
+	s.texture = texture
+}
+func (s *shader) GetTexture() (uint32, bool) {
+	if s.texture >= 999999 {
+		return 0, false
+	}
+	return s.texture, true
+}
+
 func (s *shader) storeLocations() {
 	program := s.ProgramID()
+	gl.UseProgram(program)
 
 	s.uniforms[ProjectionUniform] = gl.GetUniformLocation(program, gl.Str(fmt.Sprintf("%s\x00", ProjectionUniform)))
 	s.uniforms[CameraUniform] = gl.GetUniformLocation(program, gl.Str(fmt.Sprintf("%s\x00", CameraUniform)))

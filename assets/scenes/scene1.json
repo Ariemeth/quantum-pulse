@@ -1,5 +1,5 @@
 {
 	"models":[
-		{"name":"hexagon.json", "position":[0.0,0.0,0.0]}
+		{"name":"hexagon1","fileName":"hexagon.json", "position":[0.0,0.0,0.0]}
 		]
 }
