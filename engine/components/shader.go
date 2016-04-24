@@ -42,10 +42,14 @@ type Shader interface {
 	GetAttribLoc(name string) uint32
 	// GetName retrieves the name of the shader program.
 	GetName() string
+	// GetVAO retrieves the vao id being used by this shader.
+	GetVAO() uint32
 	// ProgramID retrieves the program id of the shader program.
 	ProgramID() uint32
-	// LoadData loads the mesh data onto the gpu.
-	LoadData(Mesh)
+	// LoadTransform loads the transform matrix onto the gpu.
+	LoadTransform(t Transform)
+	// LoadMesh loads the mesh data onto the gpu.
+	LoadMesh(Mesh)
 }
 
 // NewShader creates a new shader program and populates the uniform and attribute layouts.
@@ -90,14 +94,55 @@ func (s *shader) GetName() string {
 	return s.name
 }
 
+// GetVAO retrieves the vao id being used by this shader.
+func (s *shader) GetVAO() uint32 {
+	return s.vao
+}
+
 // ProgramID retrieves the program id of the shader program.
 func (s *shader) ProgramID() uint32 {
 	return s.program
 }
 
-// LoadData loads the mesh data onto the gpu.
-func (s *shader) LoadData(m Mesh) {
+// LoadTransform loads the transform matrix onto the gpu.
+func (s *shader) LoadTransform(t Transform) {
 
+	td := t.Data()
+	gl.UseProgram(s.program)
+	gl.UniformMatrix4fv(s.GetUniformLoc(ModelUniform), 1, false, &td[0])
+}
+
+// LoadMesh loads the mesh data onto the gpu.
+func (s *shader) LoadMesh(m Mesh) {
+
+	md := m.Data()
+	gl.UseProgram(s.program)
+
+	// Configure vertex array object with the model's data
+	gl.GenVertexArrays(1, &s.vao)
+	gl.BindVertexArray(s.vao)
+
+	var vbo uint32
+	gl.GenBuffers(1, &vbo)
+	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
+	gl.BufferData(gl.ARRAY_BUFFER, len(md.Verts)*4, gl.Ptr(md.Verts), gl.STATIC_DRAW)
+
+	vertAttrib := s.GetAttribLoc(VertexAttribute)
+	gl.EnableVertexAttribArray(vertAttrib)
+	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, md.VertSize*4, gl.PtrOffset(0)) // 4:number of bytes in a float32
+
+	texCoordAttrib := s.GetAttribLoc(VertexTexCordAttribute)
+	gl.EnableVertexAttribArray(texCoordAttrib)
+	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, md.VertSize*4, gl.PtrOffset(3*4)) // 4:number of bytes in a float32
+
+	if md.Indexed {
+		var indices uint32
+		gl.GenBuffers(1, &indices)
+		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices)
+		gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(md.Indices)*4, gl.Ptr(md.Indices), gl.STATIC_DRAW)
+	}
+
+	gl.BindVertexArray(0)
 }
 
 func (s *shader) storeLocations() {

@@ -26,9 +26,6 @@ type Model struct {
 	angle      float64
 	camera     mgl32.Mat4
 	projection mgl32.Mat4
-	vao        uint32
-	//currentProgram uint32
-	//	program        components.Shader
 }
 
 // NewModel creates a new model.
@@ -65,7 +62,7 @@ func (m *Model) Render() {
 	td := m.transform.Data()
 	gl.UniformMatrix4fv(m.shader.GetUniformLoc(components.ModelUniform), 1, false, &td[0])
 
-	gl.BindVertexArray(m.vao)
+	gl.BindVertexArray(m.shader.GetVAO())
 
 	gl.ActiveTexture(gl.TEXTURE0)
 
@@ -74,10 +71,6 @@ func (m *Model) Render() {
 
 	if isLoaded {
 		gl.BindTexture(gl.TEXTURE_2D, texture)
-	} else {
-		if md.TextureFile != "" {
-			go fmt.Printf("Unable to load texture %s", md.TextureFile)
-		}
 	}
 
 	if md.Indexed {
@@ -118,35 +111,7 @@ func (m *Model) Load(fileName string) {
 	m.camera = mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
 	gl.UniformMatrix4fv(m.shader.GetUniformLoc(components.CameraUniform), 1, false, &m.camera[0])
 
-	// Load the model vertex data.
-	td := m.transform.Data()
-	gl.UniformMatrix4fv(m.shader.GetUniformLoc(components.ModelUniform), 1, false, &td[0])
-
+	m.shader.LoadTransform(m.transform)
+	m.shader.LoadMesh(m.meshComp)
 	gl.Uniform1i(m.shader.GetUniformLoc(components.TextureUniform), 0)
-
-	// Configure vertex array object with the model's data
-	gl.GenVertexArrays(1, &m.vao)
-	gl.BindVertexArray(m.vao)
-
-	var vbo uint32
-	gl.GenBuffers(1, &vbo)
-	gl.BindBuffer(gl.ARRAY_BUFFER, vbo)
-	gl.BufferData(gl.ARRAY_BUFFER, len(md.Verts)*4, gl.Ptr(md.Verts), gl.STATIC_DRAW)
-
-	vertAttrib := m.shader.GetAttribLoc(components.VertexAttribute)
-	gl.EnableVertexAttribArray(vertAttrib)
-	gl.VertexAttribPointer(vertAttrib, 3, gl.FLOAT, false, md.VertSize*4, gl.PtrOffset(0)) // 4:number of bytes in a float32
-
-	texCoordAttrib := m.shader.GetAttribLoc(components.VertexTexCordAttribute)
-	gl.EnableVertexAttribArray(texCoordAttrib)
-	gl.VertexAttribPointer(texCoordAttrib, 2, gl.FLOAT, true, md.VertSize*4, gl.PtrOffset(3*4)) // 4:number of bytes in a float32
-
-	if md.Indexed {
-		var indices uint32
-		gl.GenBuffers(1, &indices)
-		gl.BindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices)
-		gl.BufferData(gl.ELEMENT_ARRAY_BUFFER, len(md.Indices)*4, gl.Ptr(md.Indices), gl.STATIC_DRAW)
-	}
-
-	gl.BindVertexArray(0)
 }
