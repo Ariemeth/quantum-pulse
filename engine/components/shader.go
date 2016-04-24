@@ -118,7 +118,8 @@ func (s *shader) LoadTransform(t Transform) {
 	gl.UniformMatrix4fv(s.GetUniformLoc(ModelUniform), 1, false, &td[0])
 }
 
-// LoadMesh loads the mesh data onto the gpu.
+// LoadMesh loads the mesh data onto the gpu.  This will create a new VAO and should
+// only be called once unless you need to reset the shader.
 func (s *shader) LoadMesh(m Mesh) {
 
 	md := m.Data()
@@ -154,6 +155,7 @@ func (s *shader) LoadMesh(m Mesh) {
 func (s *shader) AddTexture(texture uint32) {
 	s.texture = texture
 }
+
 func (s *shader) GetTexture() (uint32, bool) {
 	if s.texture >= 999999 {
 		return 0, false

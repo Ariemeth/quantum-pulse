@@ -56,21 +56,18 @@ func (m *Model) Update(elapsed float64) {
 func (m *Model) Render() {
 
 	gl.UseProgram(m.shader.ProgramID())
-	td := m.transform.Data()
-	gl.UniformMatrix4fv(m.shader.GetUniformLoc(components.ModelUniform), 1, false, &td[0])
 
 	gl.BindVertexArray(m.shader.GetVAO())
-
+	m.shader.LoadTransform(m.transform)
 	gl.ActiveTexture(gl.TEXTURE0)
 	gl.Uniform1i(m.shader.GetUniformLoc(components.TextureUniform), 0)
 
-	md := m.meshComp.Data()
 	texture, isLoaded := m.shader.GetTexture()
-
 	if isLoaded {
 		gl.BindTexture(gl.TEXTURE_2D, texture)
 	}
 
+	md := m.meshComp.Data()
 	if md.Indexed {
 		gl.DrawElements(gl.TRIANGLE_FAN, int32(len(md.Indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
 	} else {

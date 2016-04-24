@@ -107,6 +107,7 @@ func (s *scene) loadSceneFile(fileName string) {
 		m.AddMesh(mesh)
 
 		// Load a transform
+		// TODO load the position into the transform
 		t := components.NewTransform()
 		m.AddTransform(t)
 
