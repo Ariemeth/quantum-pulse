@@ -20,6 +20,8 @@ const (
 	VertexAttribute = "vert"
 	// VertexTexCordAttribute is the expected name of the vertex texture coordinates attribute in the shader.
 	VertexTexCordAttribute = "vertTexCoord"
+	// ShaderOutputColor is the expected name of the output color variable leaving the fragment shader.
+	ShaderOutputColor = "outputColor"
 )
 
 // shaderProgram holds information about a shader program
@@ -102,7 +104,7 @@ func (sp *shaderProgram) populateLocations() {
 	sp.attributes[VertexAttribute] = uint32(gl.GetAttribLocation(program, gl.Str(fmt.Sprintf("%s\x00", VertexAttribute))))
 	sp.attributes[VertexTexCordAttribute] = uint32(gl.GetAttribLocation(program, gl.Str(fmt.Sprintf("%s\x00", VertexTexCordAttribute))))
 
-	gl.BindFragDataLocation(program, 0, gl.Str("outputColor\x00"))
+	gl.BindFragDataLocation(program, 0, gl.Str(fmt.Sprintf("%s\x00", ShaderOutputColor)))
 }
 
 func newProgram(vertexShaderSource, fragmentShaderSource string) (uint32, error) {
