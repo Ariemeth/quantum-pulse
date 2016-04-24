@@ -62,6 +62,7 @@ func (m *Model) Render() {
 	gl.BindVertexArray(m.shader.GetVAO())
 
 	gl.ActiveTexture(gl.TEXTURE0)
+	gl.Uniform1i(m.shader.GetUniformLoc(components.TextureUniform), 0)
 
 	md := m.meshComp.Data()
 	texture, isLoaded := m.shader.GetTexture()
