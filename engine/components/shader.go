@@ -2,7 +2,6 @@ package components
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
@@ -45,27 +44,22 @@ type Shader interface {
 	GetName() string
 	// ProgramID retrieves the program id of the shader program.
 	ProgramID() uint32
+	// LoadData loads the mesh data onto the gpu.
+	LoadData(Mesh)
 }
 
 // NewShader creates a new shader program and populates the uniform and attribute layouts.
-func NewShader(name string, vertSrc, fragSrc string) (Shader, error) {
+func NewShader(name string, shaderProgram uint32) Shader {
 	s := shader{
 		uniforms:   make(map[string]int32),
 		attributes: make(map[string]uint32),
 		name:       name,
+		program:    shaderProgram,
 	}
 
-	program, err := newProgram(vertSrc, fragSrc)
+	s.storeLocations()
 
-	if err != nil {
-		return nil, err
-	}
-
-	s.program = program
-
-	s.populateLocations()
-
-	return &s, nil
+	return &s
 }
 
 // ComponentType is expected to return a string representing the type of component.
@@ -101,7 +95,12 @@ func (s *shader) ProgramID() uint32 {
 	return s.program
 }
 
-func (s *shader) populateLocations() {
+// LoadData loads the mesh data onto the gpu.
+func (s *shader) LoadData(m Mesh) {
+
+}
+
+func (s *shader) storeLocations() {
 	program := s.ProgramID()
 
 	s.uniforms[ProjectionUniform] = gl.GetUniformLocation(program, gl.Str(fmt.Sprintf("%s\x00", ProjectionUniform)))
@@ -113,62 +112,4 @@ func (s *shader) populateLocations() {
 	s.attributes[VertexTexCordAttribute] = uint32(gl.GetAttribLocation(program, gl.Str(fmt.Sprintf("%s\x00", VertexTexCordAttribute))))
 
 	gl.BindFragDataLocation(program, 0, gl.Str(fmt.Sprintf("%s\x00", ShaderOutputColor)))
-}
-
-func newProgram(vertexShaderSource, fragmentShaderSource string) (uint32, error) {
-	vertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		return 0, err
-	}
-
-	fragmentShader, err := compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER)
-	if err != nil {
-		return 0, err
-	}
-
-	program := gl.CreateProgram()
-
-	gl.AttachShader(program, vertexShader)
-	gl.AttachShader(program, fragmentShader)
-	gl.LinkProgram(program)
-
-	var status int32
-	gl.GetProgramiv(program, gl.LINK_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetProgramiv(program, gl.INFO_LOG_LENGTH, &logLength)
-
-		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetProgramInfoLog(program, logLength, nil, gl.Str(log))
-
-		return 0, fmt.Errorf("failed to link program: %v", log)
-	}
-
-	gl.DeleteShader(vertexShader)
-	gl.DeleteShader(fragmentShader)
-
-	return program, nil
-}
-
-func compileShader(source string, shaderType uint32) (uint32, error) {
-	shader := gl.CreateShader(shaderType)
-
-	csource, free := gl.Strs(source)
-	gl.ShaderSource(shader, 1, csource, nil)
-	free()
-	gl.CompileShader(shader)
-
-	var status int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
-
-		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
-
-		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
-	}
-
-	return shader, nil
 }

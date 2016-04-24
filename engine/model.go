@@ -95,11 +95,12 @@ func (m *Model) Load(fileName string) {
 	m.meshComp.Load(fileName)
 	md := m.meshComp.Data()
 
-	shader, err := m.shaders.LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, fmt.Sprintf("%s:%s", md.VertShaderFile, md.FragShaderFile), false)
+	shaderName := fmt.Sprintf("%s:%s", md.VertShaderFile, md.FragShaderFile)
+	program, err := m.shaders.LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, shaderName, false)
 	if err != nil {
 		return
 	}
-	m.shader = shader
+	m.shader = components.NewShader(shaderName, program)
 
 	// Load the texture
 	m.textures.LoadTexture(md.TextureFile, md.TextureFile)
