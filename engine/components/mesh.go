@@ -18,6 +18,7 @@ const (
 
 // Mesh represents a component that holds the data representing a mesh.
 type Mesh interface {
+	Component
 	// Data retrieves the mesh data.
 	Data() MeshData
 	// Set updates the mesh data with the new data passed in as a parameter.

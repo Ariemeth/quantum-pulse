@@ -13,6 +13,7 @@ const (
 
 // Transform represents the world position of an entity.
 type Transform interface {
+	Component
 	// Set sets the transform to a specific matrix.
 	Set(mgl32.Mat4)
 	// Data retrieves the transforms matrix.

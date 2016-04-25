@@ -37,6 +37,7 @@ type shader struct {
 
 // Shader represents the behaviors needed to access a shader and its variables.
 type Shader interface {
+	Component
 	// GetUniformLoc retrieves the shader location of the specified uniform.
 	GetUniformLoc(name string) int32
 	// GetAttribLoc retrieves the shader location of a the specified attribute.

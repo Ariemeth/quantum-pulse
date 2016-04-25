@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 
 	"github.com/Ariemeth/quantum-pulse/engine/components"
+	"github.com/Ariemeth/quantum-pulse/engine/entity"
 	sm "github.com/Ariemeth/quantum-pulse/engine/shaderManager"
+	"github.com/Ariemeth/quantum-pulse/engine/systems"
 	tm "github.com/Ariemeth/quantum-pulse/engine/textureManager"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
@@ -18,31 +20,33 @@ const (
 )
 
 type scene struct {
-	Entities    map[string]EntityOld
-	Renderables map[string]Renderable
-	fileName    string
-	shaders     sm.ShaderManager
-	textures    tm.TextureManager
-	camera      mgl32.Mat4
-	projection  mgl32.Mat4
+	Renderer   systems.Renderer
+	fileName   string
+	shaders    sm.ShaderManager
+	textures   tm.TextureManager
+	camera     mgl32.Mat4
+	projection mgl32.Mat4
 }
 
 // Scene represents a logical grouping of entities
 type Scene interface {
-	Renderable
-	AddEntity(EntityOld)
+	// Update is called to update all scene components.
+	Update(float64)
+	// Render will render each of it Renderable entities.
+	Render()
+	// ID retrieves the id of this scene.
+	ID() string
 }
 
 // NewScene creates a new Scene
 func NewScene(fileName string, shaders sm.ShaderManager, textures tm.TextureManager) Scene {
 	scene := scene{
-		fileName:    fileName,
-		Entities:    make(map[string]EntityOld),
-		Renderables: make(map[string]Renderable),
-		shaders:     shaders,
-		textures:    textures,
-		camera:      mgl32.Ident4(),
-		projection:  mgl32.Ident4(),
+		fileName:   fileName,
+		Renderer:   systems.NewRenderer(),
+		shaders:    shaders,
+		textures:   textures,
+		camera:     mgl32.Ident4(),
+		projection: mgl32.Ident4(),
 	}
 
 	scene.projection = mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
@@ -59,28 +63,14 @@ func (s *scene) ID() string {
 	return s.fileName
 }
 
-// AddEntity adds an Entity to the scene.
-func (s *scene) AddEntity(ent EntityOld) {
-	s.Entities[ent.ID()] = ent
-
-	// if it is also a Renderable add it to the map of Renderables
-	if rend, ok := ent.(Renderable); ok {
-		s.Renderables[rend.ID()] = rend
-	}
-}
-
 // Update is called to update all scene components.
 func (s *scene) Update(elapsed float64) {
-	for _, r := range s.Renderables {
-		r.Update(elapsed)
-	}
+
 }
 
 // Render will render each of it Renderable entities.
 func (s *scene) Render() {
-	for _, r := range s.Renderables {
-		r.Render()
-	}
+	s.Renderer.Process()
 }
 
 func (s *scene) loadSceneFile(fileName string) {
@@ -95,7 +85,6 @@ func (s *scene) loadSceneFile(fileName string) {
 	json.Unmarshal(data, &sd)
 
 	for _, modelFile := range sd.Models {
-		m := NewModel(modelFile.Name)
 
 		// Load the mesh
 		mesh := components.NewMesh()
@@ -104,12 +93,10 @@ func (s *scene) loadSceneFile(fileName string) {
 			fmt.Printf("Unable to load mesh:%s", modelFile.FileName)
 			continue
 		}
-		m.AddMesh(mesh)
 
 		// Load a transform
 		// TODO load the position into the transform
 		t := components.NewTransform()
-		m.AddTransform(t)
 
 		// Load the shader
 		md := mesh.Data()
@@ -122,7 +109,6 @@ func (s *scene) loadSceneFile(fileName string) {
 		shader := components.NewShader(shaderName, program)
 		shader.LoadMesh(mesh)
 		shader.LoadTransform(t)
-		m.AddShader(shader)
 
 		// Load textures
 		texture, err := s.textures.LoadTexture(md.TextureFile, md.TextureFile)
@@ -138,7 +124,12 @@ func (s *scene) loadSceneFile(fileName string) {
 		//TODO this really only needs to be done once per shader
 		gl.UniformMatrix4fv(shader.GetUniformLoc(components.CameraUniform), 1, false, &s.camera[0])
 
-		s.AddEntity(m)
+		ent := entity.NewEntity(modelFile.Name)
+		ent.AddComponent(mesh)
+		ent.AddComponent(t)
+		ent.AddComponent(shader)
+
+		s.Renderer.AddEntity(ent)
 	}
 
 }
