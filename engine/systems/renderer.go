@@ -7,12 +7,14 @@ import (
 )
 
 const (
+	// SystemTypeRenderer is the name of the renderer system.
 	SystemTypeRenderer = "renderer"
 )
 
 // Renderer provides the interface needed to process the rendering of Entities.  Each time Process is called all Entities will be rendered.
 type Renderer interface {
 	System
+	// Process renders all renderable entities.
 	Process()
 }
 

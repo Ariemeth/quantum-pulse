@@ -21,6 +21,7 @@ const (
 
 type scene struct {
 	Renderer   systems.Renderer
+	Animator   systems.Animator
 	fileName   string
 	shaders    sm.ShaderManager
 	textures   tm.TextureManager
@@ -43,6 +44,7 @@ func NewScene(fileName string, shaders sm.ShaderManager, textures tm.TextureMana
 	scene := scene{
 		fileName:   fileName,
 		Renderer:   systems.NewRenderer(),
+		Animator:   systems.NewAnimator(),
 		shaders:    shaders,
 		textures:   textures,
 		camera:     mgl32.Ident4(),
@@ -65,7 +67,7 @@ func (s *scene) ID() string {
 
 // Update is called to update all scene components.
 func (s *scene) Update(elapsed float64) {
-
+	s.Animator.Process(elapsed)
 }
 
 // Render will render each of it Renderable entities.
@@ -130,6 +132,11 @@ func (s *scene) loadSceneFile(fileName string) {
 		ent.AddComponent(shader)
 
 		s.Renderer.AddEntity(ent)
+
+		// should be checking to see if the scene file indicates the model should be animated
+
+		s.Animator.AddEntity(ent)
+
 	}
 
 }
