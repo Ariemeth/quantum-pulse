@@ -3,7 +3,6 @@ package systems
 import (
 	"github.com/Ariemeth/quantum-pulse/engine/components"
 	"github.com/Ariemeth/quantum-pulse/engine/entity"
-	"github.com/go-gl/mathgl/mgl32"
 )
 
 const (
@@ -61,27 +60,25 @@ func (m *movement) RemoveEntity(e entity.Entity) {
 func (m *movement) Process(elapsed float64) {
 	e := float32(elapsed)
 	for _, ent := range m.entities {
-		t := ent.Transform.Data()
-		//		accRot := ent.Acceleration.Rotational()
-		//		accTran := ent.Acceleration.Translational()
-		//		vel := ent.Velocity.Data()
-		//		rotX := mgl32.HomogRotate3D(e*accRot.X(), mgl32.Vec3{1, 0, 0})
-		//		rotY := mgl32.HomogRotate3D(e*accRot.Y(), mgl32.Vec3{0, 1, 0})
-		//		rotZ := mgl32.HomogRotate3D(e*accRot.Z(), mgl32.Vec3{0, 0, 1})
-		//		accResult := rotX.Mul4(rotY.Mul4(rotZ))
-		//		accResult = accResult.Mul4(mgl32.Translate3D(accTran.X(), accTran.Y(), accTran.Z()))
-
 		// adjust the velocity based on the acceleration.
-		//		vel = vel.Mul4(accResult)
-		//		ent.Velocity.Set(vel)
+		updateVelocityUsingAcceleration(e, ent.Acceleration, ent.Velocity)
 
-		//		result := t.Mul4(vel)
-		//		ent.Velocity.Set(result)
-		velMatrix := mgl32.HomogRotate3D(float32(ent.Velocity.Rotational().Y()*e), mgl32.Vec3{0, 1, 0})
-		ent.Transform.Set(t.Mul4(velMatrix))
-		//	ent.Transform.Set(t.Mul4(result))
-		//ent.Transform.Set(t.HomogRotate3D(float32(angle), mgl32.Vec3{0, 1, 0}))
+		// Apply velocity matrix to the transform
+		ent.Transform.Translate(ent.Velocity.Translational().Mul(e))
+		ent.Transform.Rotate(ent.Velocity.Rotational().Mul(e))
 	}
+}
+
+// updateVelocityUsingAcceleration updates a velocity component by adding the acceleration component to the velocity component based on how much time has passed.
+func updateVelocityUsingAcceleration(elapsed float32, a components.Acceleration, v components.Velocity) {
+	accRot, accTrans := a.Rotational(), a.Translational()
+	velRot, velTrans := v.Rotational(), v.Translational()
+
+	velRot = velRot.Add(accRot.Mul(elapsed))
+	velTrans = velTrans.Add(accTrans.Mul(elapsed))
+
+	v.SetRotational(velRot)
+	v.SetTranslational(velTrans)
 }
 
 type movable struct {

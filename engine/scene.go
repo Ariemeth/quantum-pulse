@@ -134,11 +134,11 @@ func (s *scene) loadSceneFile(fileName string) {
 		ent.AddComponent(t)
 		ent.AddComponent(shader)
 
-		//default to 0 velocity
 		vel := components.NewVelocity()
-		// set rotation to rotate around the Y axis at 1 radian per second
+		// set rotation velocity to rotate around the Y axis at 1 radian per second
 		vel.SetRotational(mgl32.Vec3{0, 1, 0})
 		accel := components.NewAcceleration()
+		accel.SetRotational(mgl32.Vec3{0, 0.2, 0})
 
 		ent.AddComponent(vel)
 		ent.AddComponent(accel)

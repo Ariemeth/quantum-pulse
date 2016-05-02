@@ -25,7 +25,6 @@ type Acceleration interface {
 }
 
 type acceleration struct {
-	data          mgl32.Mat4
 	rotational    mgl32.Vec3
 	translational mgl32.Vec3
 	dataLock      sync.RWMutex
@@ -45,24 +44,28 @@ func (a *acceleration) ComponentType() string {
 	return ComponentTypeAcceleration
 }
 
+// Rotational retrieves the rotational acceleration in radians per second.
 func (a *acceleration) Rotational() mgl32.Vec3 {
 	a.dataLock.RLock()
 	defer a.dataLock.RUnlock()
 	return a.rotational
 }
 
+// Translational retrieves the translational acceleration.
 func (a *acceleration) Translational() mgl32.Vec3 {
 	a.dataLock.RLock()
 	defer a.dataLock.RUnlock()
 	return a.translational
 }
 
+// SetRotational sets the rotational acceleration.
 func (a *acceleration) SetRotational(r mgl32.Vec3) {
 	a.dataLock.Lock()
 	defer a.dataLock.Unlock()
 	a.rotational = r
 }
 
+// SetTranslational sets the translational acceleration.
 func (a *acceleration) SetTranslational(t mgl32.Vec3) {
 	a.dataLock.Lock()
 	defer a.dataLock.Unlock()
