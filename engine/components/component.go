@@ -1,4 +1,3 @@
-// Package components provides the various components used by the different engine systems.
 package components
 
 // Component presents the behavior all components must have.
