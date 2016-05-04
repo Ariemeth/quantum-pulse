@@ -1,11 +1,11 @@
 #version 410
 
+layout(location = 0) in vec2 fragTexCoord;
+layout(location = 1) in vec4 position;
+
 uniform sampler2D tex;
 
-in vec2 fragTexCoord;
-
 out vec4 outputColor;
-in vec4 position;
 
 void main() {
 	if(gl_FrontFacing)

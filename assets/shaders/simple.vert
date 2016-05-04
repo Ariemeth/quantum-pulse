@@ -1,14 +1,14 @@
 #version 410
 
+layout(location = 0) in vec3 vert;
+layout(location = 1) in vec2 vertTexCoord;
+
 uniform mat4 projection;
 uniform mat4 camera;
 uniform mat4 model;
 
-in vec3 vert;
-in vec2 vertTexCoord;
-
-out vec2 fragTexCoord;
-out vec4 position;
+layout(location = 0) out vec2 fragTexCoord;
+layout(location = 1) out vec4 position;
 
 void main() {
     fragTexCoord = vertTexCoord;
