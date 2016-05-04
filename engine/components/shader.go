@@ -175,6 +175,4 @@ func (s *shader) storeLocations() {
 
 	s.attributes[VertexAttribute] = 0
 	s.attributes[VertexTexCordAttribute] = 1
-
-	gl.BindFragDataLocation(program, 0, gl.Str(fmt.Sprintf("%s\x00", ShaderOutputColor)))
 }

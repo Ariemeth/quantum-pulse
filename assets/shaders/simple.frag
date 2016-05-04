@@ -1,11 +1,14 @@
 #version 410
 
+// Input attributes
 layout(location = 0) in vec2 fragTexCoord;
 layout(location = 1) in vec4 position;
 
+// Uniforms
 uniform sampler2D tex;
 
-out vec4 outputColor;
+// Output attributes
+layout(location = 0) out vec4 outputColor;
 
 void main() {
 	if(gl_FrontFacing)
