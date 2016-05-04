@@ -112,8 +112,7 @@ func (s *scene) loadSceneFile(fileName string) {
 			continue
 		}
 		shader := components.NewShader(shaderName, program)
-		shader.LoadMesh(mesh)
-		shader.LoadTransform(t)
+		shader.CreateVAO(mesh)
 
 		// Load textures
 		texture, err := s.textures.LoadTexture(md.TextureFile, md.TextureFile)

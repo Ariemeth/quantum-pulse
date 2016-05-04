@@ -64,7 +64,8 @@ func (r *renderer) Process() {
 		gl.UseProgram(ent.Shader.ProgramID())
 
 		gl.BindVertexArray(ent.Shader.GetVAO())
-		ent.Shader.LoadTransform(ent.Transform)
+		td := ent.Transform.Data()
+		gl.UniformMatrix4fv(ent.Shader.GetUniformLoc(components.ModelUniform), 1, false, &td[0])
 		gl.ActiveTexture(gl.TEXTURE0)
 		gl.Uniform1i(ent.Shader.GetUniformLoc(components.TextureUniform), 0)
 

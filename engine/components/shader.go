@@ -48,10 +48,8 @@ type Shader interface {
 	GetVAO() uint32
 	// ProgramID retrieves the program id of the shader program.
 	ProgramID() uint32
-	// LoadTransform loads the transform matrix onto the gpu.
-	LoadTransform(Transform)
-	// LoadMesh loads the mesh data onto the gpu.
-	LoadMesh(Mesh)
+	// CreateVAO loads the mesh data onto the gpu.
+	CreateVAO(Mesh)
 	// AddTexture adds the texture id to use with this shader.
 	AddTexture(uint32)
 	// GetTexture retrieves the texture id to use with this shader.
@@ -111,17 +109,9 @@ func (s *shader) ProgramID() uint32 {
 	return s.program
 }
 
-// LoadTransform loads the transform matrix onto the gpu.
-func (s *shader) LoadTransform(t Transform) {
-
-	td := t.Data()
-	gl.UseProgram(s.program)
-	gl.UniformMatrix4fv(s.GetUniformLoc(ModelUniform), 1, false, &td[0])
-}
-
-// LoadMesh loads the mesh data onto the gpu.  This will create a new VAO and should
+// CreateVAO loads the mesh data onto the gpu.  This will create a new VAO and should
 // only be called once unless you need to reset the shader.
-func (s *shader) LoadMesh(m Mesh) {
+func (s *shader) CreateVAO(m Mesh) {
 
 	md := m.Data()
 	gl.UseProgram(s.program)
