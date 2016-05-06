@@ -1,4 +1,4 @@
-package textureManager
+package assets
 
 import (
 	"fmt"

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	sm "github.com/Ariemeth/quantum-pulse/engine/shaderManager"
-	tm "github.com/Ariemeth/quantum-pulse/engine/textureManager"
+	am "github.com/Ariemeth/quantum-pulse/engine/assets"
+
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
 )
@@ -16,8 +16,8 @@ const windowHeight = 600
 // Engine constitutes the rendering engine which creates and initializes the rendering system.
 type Engine struct {
 	window       *glfw.Window
-	shaders      sm.ShaderManager
-	textures     tm.TextureManager
+	shaders      am.ShaderManager
+	textures     am.TextureManager
 	scenes       map[string]Scene
 	currentScene Scene
 }
@@ -32,8 +32,8 @@ func (e *Engine) Init() {
 
 	initGL()
 
-	e.shaders = sm.NewShaderManager()
-	e.textures = tm.NewTextureManager()
+	e.shaders = am.NewShaderManager()
+	e.textures = am.NewTextureManager()
 	e.scenes = make(map[string]Scene)
 
 }

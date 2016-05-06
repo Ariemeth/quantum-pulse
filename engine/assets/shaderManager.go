@@ -1,4 +1,4 @@
-package shaderManager
+package assets
 
 import (
 	"fmt"

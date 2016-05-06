@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	am "github.com/Ariemeth/quantum-pulse/engine/assets"
 	"github.com/Ariemeth/quantum-pulse/engine/components"
 	"github.com/Ariemeth/quantum-pulse/engine/entity"
-	sm "github.com/Ariemeth/quantum-pulse/engine/shaderManager"
 	"github.com/Ariemeth/quantum-pulse/engine/systems"
-	tm "github.com/Ariemeth/quantum-pulse/engine/textureManager"
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/mathgl/mgl32"
 )
@@ -24,8 +23,8 @@ type scene struct {
 	Animator   systems.Animator
 	Movement   systems.Movement
 	fileName   string
-	shaders    sm.ShaderManager
-	textures   tm.TextureManager
+	shaders    am.ShaderManager
+	textures   am.TextureManager
 	camera     mgl32.Mat4
 	projection mgl32.Mat4
 }
@@ -41,7 +40,7 @@ type Scene interface {
 }
 
 // NewScene creates a new Scene
-func NewScene(fileName string, shaders sm.ShaderManager, textures tm.TextureManager) Scene {
+func NewScene(fileName string, shaders am.ShaderManager, textures am.TextureManager) Scene {
 	scene := scene{
 		fileName:   fileName,
 		Renderer:   systems.NewRenderer(),
