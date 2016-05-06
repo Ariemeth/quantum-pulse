@@ -35,8 +35,8 @@ type ShaderManager interface {
 	GetDefaultShader() uint32
 }
 
-// NewShaderManager creates a new ShaderManager
-func NewShaderManager() ShaderManager {
+// newShaderManager creates a new ShaderManager
+func newShaderManager() ShaderManager {
 	sm := shaderManager{programs: make(map[string]uint32)}
 	return &sm
 }

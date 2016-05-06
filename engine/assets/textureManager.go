@@ -31,8 +31,8 @@ type TextureManager interface {
 	GetTexture(key string) (texture uint32, isFound bool)
 }
 
-// NewTextureManager creates a new TextureManager
-func NewTextureManager() TextureManager {
+// newTextureManager creates a new TextureManager
+func newTextureManager() TextureManager {
 	tm := textureManager{textures: make(map[string]uint32)}
 	return &tm
 }

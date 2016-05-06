@@ -16,8 +16,7 @@ const windowHeight = 600
 // Engine constitutes the rendering engine which creates and initializes the rendering system.
 type Engine struct {
 	window       *glfw.Window
-	shaders      am.ShaderManager
-	textures     am.TextureManager
+	assets       *am.AssetManager
 	scenes       map[string]Scene
 	currentScene Scene
 }
@@ -32,8 +31,7 @@ func (e *Engine) Init() {
 
 	initGL()
 
-	e.shaders = am.NewShaderManager()
-	e.textures = am.NewTextureManager()
+	e.assets = am.NewAssetManager()
 	e.scenes = make(map[string]Scene)
 
 }
@@ -80,7 +78,7 @@ func (e *Engine) LoadScene(name string) {
 // must still call LoadScene with the scene id to load it as the current scene.  LoadSceneFile
 // should not be called before Init is called.
 func (e *Engine) LoadSceneFile(fileName string) string {
-	scene := NewScene(fileName, e.shaders, e.textures)
+	scene := NewScene(fileName, e.assets)
 	e.AddScene(scene, scene.ID())
 	return scene.ID()
 }

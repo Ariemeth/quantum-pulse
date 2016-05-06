@@ -23,8 +23,7 @@ type scene struct {
 	Animator   systems.Animator
 	Movement   systems.Movement
 	fileName   string
-	shaders    am.ShaderManager
-	textures   am.TextureManager
+	assets     *am.AssetManager
 	camera     mgl32.Mat4
 	projection mgl32.Mat4
 }
@@ -40,14 +39,13 @@ type Scene interface {
 }
 
 // NewScene creates a new Scene
-func NewScene(fileName string, shaders am.ShaderManager, textures am.TextureManager) Scene {
+func NewScene(fileName string, assets *am.AssetManager) Scene {
 	scene := scene{
 		fileName:   fileName,
 		Renderer:   systems.NewRenderer(),
 		Animator:   systems.NewAnimator(),
 		Movement:   systems.NewMovement(),
-		shaders:    shaders,
-		textures:   textures,
+		assets:     assets,
 		camera:     mgl32.Ident4(),
 		projection: mgl32.Ident4(),
 	}
@@ -105,7 +103,7 @@ func (s *scene) loadSceneFile(fileName string) {
 		// Load the shader
 		md := mesh.Data()
 		shaderName := fmt.Sprintf("%s:%s", md.VertShaderFile, md.FragShaderFile)
-		program, err := s.shaders.LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, shaderName, false)
+		program, err := s.assets.Shaders().LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, shaderName, false)
 		if err != nil {
 			fmt.Printf("Unable to load shader:%s", shaderName)
 			continue
@@ -114,7 +112,7 @@ func (s *scene) loadSceneFile(fileName string) {
 		shader.CreateVAO(mesh)
 
 		// Load textures
-		texture, err := s.textures.LoadTexture(md.TextureFile, md.TextureFile)
+		texture, err := s.assets.Textures().LoadTexture(md.TextureFile, md.TextureFile)
 		if err != nil {
 			fmt.Printf("Unable to load texture:%s", md.TextureFile)
 			continue
