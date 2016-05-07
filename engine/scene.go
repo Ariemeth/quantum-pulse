@@ -99,6 +99,8 @@ func (s *scene) loadSceneFile(fileName string) {
 		// Load a transform
 		// TODO load the position into the transform
 		t := components.NewTransform()
+		pos := mgl32.Vec3{modelFile.Position[0], modelFile.Position[1], modelFile.Position[2]}
+		t.Translate(pos)
 
 		// Load the shader
 		md := mesh.Data()
@@ -132,9 +134,11 @@ func (s *scene) loadSceneFile(fileName string) {
 
 		vel := components.NewVelocity()
 		// set rotation velocity to rotate around the Y axis at 1 radian per second
-		vel.SetRotational(mgl32.Vec3{0, 1, 0})
+		rotVel := mgl32.Vec3{modelFile.RotVelocity[0], modelFile.RotVelocity[1], modelFile.RotVelocity[2]}
+		vel.SetRotational(rotVel)
 		accel := components.NewAcceleration()
-		accel.SetRotational(mgl32.Vec3{0, 0.2, 0})
+		accVel := mgl32.Vec3{modelFile.RotAccel[0], modelFile.RotAccel[1], modelFile.RotAccel[2]}
+		accel.SetRotational(accVel)
 
 		ent.AddComponent(vel)
 		ent.AddComponent(accel)
@@ -150,7 +154,11 @@ type sceneData struct {
 }
 
 type sceneModels struct {
-	Name     string    `json:"name"`
-	FileName string    `json:"fileName"`
-	Position []float32 `json:"position"`
+	Name          string    `json:"name"`
+	FileName      string    `json:"fileName"`
+	Position      []float32 `json:"position"`
+	RotAccel      []float32 `json:"rotationalAcceleration"`
+	TransAccel    []float32 `json:"translationalAcceleration"`
+	RotVelocity   []float32 `json:"rotationalVelocity"`
+	TransVelocity []float32 `json:"translationalVelocity"`
 }
