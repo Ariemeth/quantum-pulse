@@ -50,10 +50,6 @@ func NewScene(fileName string, assets *am.AssetManager) Scene {
 		projection: mgl32.Ident4(),
 	}
 
-	scene.projection = mgl32.Perspective(mgl32.DegToRad(45.0), float32(windowWidth)/windowHeight, 0.1, 10.0)
-
-	scene.camera = mgl32.LookAtV(mgl32.Vec3{3, 3, 3}, mgl32.Vec3{0, 0, 0}, mgl32.Vec3{0, 1, 0})
-
 	scene.loadSceneFile(fileName)
 
 	return &scene
@@ -84,8 +80,23 @@ func (s *scene) loadSceneFile(fileName string) {
 	}
 
 	var sd sceneData
-	json.Unmarshal(data, &sd)
+	err = json.Unmarshal(data, &sd)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
+	// configure the camera
+	camEye := mgl32.Vec3{sd.Camera.Position[0], sd.Camera.Position[1], sd.Camera.Position[2]}
+	camAt := mgl32.Vec3{sd.Camera.LookAt[0], sd.Camera.LookAt[1], sd.Camera.LookAt[2]}
+	camUp := mgl32.Vec3{sd.Camera.Up[0], sd.Camera.Up[1], sd.Camera.Up[2]}
+	s.camera = mgl32.LookAtV(camEye, camAt, camUp)
+
+	// Set the perspective
+	fovy := mgl32.DegToRad(sd.Camera.FOVY)
+	s.projection = mgl32.Perspective(fovy, float32(windowWidth)/windowHeight, sd.Camera.NearPlane, sd.Camera.FarPlane)
+
+	// Load models
 	for _, modelFile := range sd.Models {
 
 		// Load the mesh
@@ -97,7 +108,6 @@ func (s *scene) loadSceneFile(fileName string) {
 		}
 
 		// Load a transform
-		// TODO load the position into the transform
 		t := components.NewTransform()
 		pos := mgl32.Vec3{modelFile.Position[0], modelFile.Position[1], modelFile.Position[2]}
 		t.Translate(pos)
@@ -150,6 +160,7 @@ func (s *scene) loadSceneFile(fileName string) {
 }
 
 type sceneData struct {
+	Camera sceneCamera   `json:"defaultCamera"`
 	Models []sceneModels `json:"models"`
 }
 
@@ -161,4 +172,13 @@ type sceneModels struct {
 	TransAccel    []float32 `json:"translationalAcceleration"`
 	RotVelocity   []float32 `json:"rotationalVelocity"`
 	TransVelocity []float32 `json:"translationalVelocity"`
+}
+
+type sceneCamera struct {
+	Position  []float32 `json:"position"`
+	LookAt    []float32 `json:"lookat"`
+	Up        []float32 `json:"up"`
+	FOVY      float32   `json:"fovy"`
+	NearPlane float32   `json:"nearPlane"`
+	FarPlane  float32   `json:"farPlane"`
 }

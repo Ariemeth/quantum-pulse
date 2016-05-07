@@ -1,4 +1,13 @@
 {
+	"defaultCamera":
+	{
+		"position":[0.0,0.0,5.0],
+		"lookat":[0.0,0.0,0.0],
+		"up":[0.0,1.0,0.0],
+		"fovy":60.0,
+		"nearPlane":0.1,
+		"farPlane":10.0
+	},
 	"models":
 	[
 		{
