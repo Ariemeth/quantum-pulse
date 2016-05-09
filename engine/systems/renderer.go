@@ -20,13 +20,13 @@ type Renderer interface {
 	// Process renders all renderable entities.
 	Process()
 	// LoadCamera sets the camera to be used by the display.
-	LoadCamera(camera Camera)
+	LoadCamera(camera components.Camera)
 }
 
 type renderer struct {
 	entities map[string]renderable
 	assets   *am.AssetManager
-	camera   Camera
+	camera   components.Camera
 }
 
 // NewRenderer creates a new rendererB system.  The rendererB system handles rendering all renderable Entities to the screen.
@@ -34,7 +34,7 @@ func NewRenderer(assetManager *am.AssetManager) Renderer {
 	r := renderer{
 		entities: make(map[string]renderable),
 		assets:   assetManager,
-		camera:   NewCamera(),
+		camera:   components.NewCamera(),
 	}
 
 	return &r
@@ -127,7 +127,7 @@ func (r *renderer) Process() {
 }
 
 // LoadCamera sets the camera to be used by the display.
-func (r *renderer) LoadCamera(camera Camera) {
+func (r *renderer) LoadCamera(camera components.Camera) {
 	r.camera = camera
 }
 

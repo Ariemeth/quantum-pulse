@@ -82,7 +82,7 @@ func (s *scene) loadSceneFile(fileName string) {
 	}
 
 	// configure the camera
-	cam := systems.NewCamera()
+	cam := components.NewCamera()
 	cam.SetView(sd.Camera.Position, sd.Camera.LookAt, sd.Camera.Up)
 	cam.SetProjection(sd.Camera.FOVY, sd.Camera.NearPlane, sd.Camera.FarPlane, windowWidth, windowHeight)
 	s.Renderer.LoadCamera(cam)
