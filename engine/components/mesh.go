@@ -96,4 +96,6 @@ type MeshData struct {
 	TextureFile    string    `json:"textureFile"`
 	FragShaderFile string    `json:"fragShaderFile"`
 	VertShaderFile string    `json:"vertShaderFile"`
+	VAO            uint32    `json:"-"`
+	ProgramID      uint32    `json:"-"`
 }

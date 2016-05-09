@@ -18,9 +18,10 @@ const (
 
 // shaderManager stores shader programs
 type shaderManager struct {
-	programs      map[string]uint32
-	programLock   sync.RWMutex
-	DefaultShader string
+	programs       map[string]uint32
+	shaderPrograms map[string]Shader
+	programLock    sync.RWMutex
+	DefaultShader  string
 }
 
 // ShaderManager interface is used to interact with the shaderManager.
@@ -37,7 +38,10 @@ type ShaderManager interface {
 
 // newShaderManager creates a new ShaderManager
 func newShaderManager() ShaderManager {
-	sm := shaderManager{programs: make(map[string]uint32)}
+	sm := shaderManager{
+		programs:       make(map[string]uint32),
+		shaderPrograms: make(map[string]Shader),
+	}
 	return &sm
 }
 
@@ -85,6 +89,10 @@ func (sm *shaderManager) LoadProgramFromSrc(vertSrc string, fragSrc string, name
 	if len(sm.programs) == 1 || shouldBeDefault {
 		sm.DefaultShader = name
 	}
+
+	shader := newShader(name, program)
+	sm.shaderPrograms[name] = shader
+
 	return program, nil
 }
 
