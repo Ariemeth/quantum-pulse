@@ -30,10 +30,8 @@ const (
 type shader struct {
 	uniforms   map[string]int32
 	attributes map[string]uint32
-	texture    uint32
 	name       string //shader name
 	program    uint32
-	vao        uint32
 }
 
 // Shader represents the behaviors needed to access a shader and its variables.
@@ -44,12 +42,10 @@ type Shader interface {
 	GetAttribLoc(name string) uint32
 	// GetName retrieves the name of the shader program.
 	GetName() string
-	// GetVAO retrieves the vao id being used by this shader.
-	GetVAO() uint32
 	// ProgramID retrieves the program id of the shader program.
 	ProgramID() uint32
 	// CreateVAO loads the mesh data onto the gpu.
-	CreateVAO(components.Mesh)
+	CreateVAO(components.Mesh) uint32
 }
 
 // newShader creates a new shader program and populates the uniform and attribute layouts.
@@ -59,7 +55,6 @@ func newShader(name string, shaderProgram uint32) Shader {
 		attributes: make(map[string]uint32),
 		name:       name,
 		program:    shaderProgram,
-		texture:    999999,
 	}
 
 	s.storeLocations()
@@ -95,11 +90,6 @@ func (s *shader) GetName() string {
 	return s.name
 }
 
-// GetVAO retrieves the vao id being used by this shader.
-func (s *shader) GetVAO() uint32 {
-	return s.vao
-}
-
 // ProgramID retrieves the program id of the shader program.
 func (s *shader) ProgramID() uint32 {
 	return s.program
@@ -107,14 +97,15 @@ func (s *shader) ProgramID() uint32 {
 
 // CreateVAO loads the mesh data onto the gpu.  This will create a new VAO and should
 // only be called once unless you need to reset the shader.
-func (s *shader) CreateVAO(m components.Mesh) {
+func (s *shader) CreateVAO(m components.Mesh) uint32 {
 
 	md := m.Data()
 	gl.UseProgram(s.program)
 
 	// Configure vertex array object with the model's data
-	gl.GenVertexArrays(1, &s.vao)
-	gl.BindVertexArray(s.vao)
+	var vao uint32
+	gl.GenVertexArrays(1, &vao)
+	gl.BindVertexArray(vao)
 
 	var vbo uint32
 	gl.GenBuffers(1, &vbo)
@@ -137,6 +128,7 @@ func (s *shader) CreateVAO(m components.Mesh) {
 	}
 
 	gl.BindVertexArray(0)
+	return vao
 }
 
 func (s *shader) storeLocations() {

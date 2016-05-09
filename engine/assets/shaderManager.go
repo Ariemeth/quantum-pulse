@@ -19,7 +19,7 @@ const (
 // shaderManager stores shader programs
 type shaderManager struct {
 	programs       map[string]uint32
-	shaderPrograms map[string]Shader
+	shaderPrograms map[uint32]Shader
 	programLock    sync.RWMutex
 	DefaultShader  string
 }
@@ -27,11 +27,13 @@ type shaderManager struct {
 // ShaderManager interface is used to interact with the shaderManager.
 type ShaderManager interface {
 	// LoadProgramFromFile creates a shader program from a vertex and fragment shader source files.
-	LoadProgramFromFile(vertSrcFile string, fragSrcFile string, name string, shouldBeDefault bool) (uint32, error)
+	LoadProgramFromFile(vertSrcFile string, fragSrcFile string, shouldBeDefault bool) (uint32, error)
 	// LoadProgramFromSrc creates a shader program from a vertex and fragment shader source strings.
 	LoadProgramFromSrc(vertSrc string, fragSrc string, name string, shouldBeDefault bool) (uint32, error)
 	// GetShader returns a program id if the shader program was loaded.
 	GetShader(key string) (uint32, bool)
+	// GetShaderProgram returns the Shader interface with information about the opengl shader.
+	GetShaderProgram(id uint32) (Shader, bool)
 	// GetDefaultShader returns the name of the default shader.
 	GetDefaultShader() uint32
 }
@@ -40,14 +42,14 @@ type ShaderManager interface {
 func newShaderManager() ShaderManager {
 	sm := shaderManager{
 		programs:       make(map[string]uint32),
-		shaderPrograms: make(map[string]Shader),
+		shaderPrograms: make(map[uint32]Shader),
 	}
 	return &sm
 }
 
 // LoadProgramFromFile creates a shader program from a vertex and fragment shader source files.
-func (sm *shaderManager) LoadProgramFromFile(vertSrcFile string, fragSrcFile string, name string, shouldBeDefault bool) (uint32, error) {
-
+func (sm *shaderManager) LoadProgramFromFile(vertSrcFile string, fragSrcFile string, shouldBeDefault bool) (uint32, error) {
+	name := fmt.Sprintf("%s:%s", vertSrcFile, fragSrcFile)
 	simpleVert, err := loadShaderFile(fmt.Sprintf("%s%s", ShaderSrcDir, vertSrcFile))
 	if err != nil {
 		fmt.Println(err)
@@ -91,7 +93,7 @@ func (sm *shaderManager) LoadProgramFromSrc(vertSrc string, fragSrc string, name
 	}
 
 	shader := newShader(name, program)
-	sm.shaderPrograms[name] = shader
+	sm.shaderPrograms[program] = shader
 
 	return program, nil
 }
@@ -103,6 +105,15 @@ func (sm *shaderManager) GetShader(key string) (uint32, bool) {
 	sm.programLock.RLock()
 	defer sm.programLock.RUnlock()
 	program, status := sm.programs[key]
+
+	return program, status
+}
+
+// GetShaderProgram returns the Shader interface with information about the opengl shader.
+func (sm *shaderManager) GetShaderProgram(id uint32) (Shader, bool) {
+	sm.programLock.RLock()
+	defer sm.programLock.RUnlock()
+	program, status := sm.shaderPrograms[id]
 
 	return program, status
 }

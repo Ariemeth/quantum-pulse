@@ -1,6 +1,9 @@
 package systems
 
 import (
+	"fmt"
+
+	am "github.com/Ariemeth/quantum-pulse/engine/assets"
 	"github.com/Ariemeth/quantum-pulse/engine/components"
 	"github.com/Ariemeth/quantum-pulse/engine/entity"
 	"github.com/go-gl/gl/v4.1-core/gl"
@@ -16,16 +19,22 @@ type Renderer interface {
 	System
 	// Process renders all renderable entities.
 	Process()
+	// LoadCamera sets the camera to be used by the display.
+	LoadCamera(camera Camera)
 }
 
 type renderer struct {
 	entities map[string]renderable
+	assets   *am.AssetManager
+	camera   Camera
 }
 
 // NewRenderer creates a new rendererB system.  The rendererB system handles rendering all renderable Entities to the screen.
-func NewRenderer() Renderer {
+func NewRenderer(assetManager *am.AssetManager) Renderer {
 	r := renderer{
 		entities: make(map[string]renderable),
+		assets:   assetManager,
+		camera:   NewCamera(),
 	}
 
 	return &r
@@ -39,15 +48,37 @@ func (r *renderer) SystemType() string {
 // AddEntity adds an Entity to the system.  Each system will have a component requirement that must be met before the Entity can be added.
 func (r *renderer) AddEntity(e entity.Entity) {
 	mesh, isMesh := e.Component(components.ComponentTypeMesh).(components.Mesh)
-	shader, isShader := e.Component(components.ComponentTypeShader).(components.Shader)
 	transform, isTransform := e.Component(components.ComponentTypeTransform).(components.Transform)
 
-	if isMesh && isShader && isTransform {
+	if isMesh && isTransform {
 		rend := renderable{
 			Mesh:      mesh,
-			Shader:    shader,
 			Transform: transform,
 		}
+		// Set up the shader
+		md := mesh.Data()
+		shader, err := r.assets.Shaders().LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, false)
+		if err != nil {
+			fmt.Printf("Unable to load shaders %s,%s", md.VertShaderFile, md.FragShaderFile)
+			return
+		}
+		shaderProgram, status := r.assets.Shaders().GetShaderProgram(shader)
+		if status {
+			md.ProgramID = shader
+			md.VAO = shaderProgram.CreateVAO(mesh)
+		}
+
+		// Load and set the texture if it exists.
+		texture, err := r.assets.Textures().LoadTexture(md.TextureFile, md.TextureFile)
+		if err != nil {
+			fmt.Printf("Unable to load texture:%s", md.TextureFile)
+			return
+		}
+
+		md.TextureID = texture
+		// Add the shader and texture ids to the mesh component.
+		mesh.Set(md)
+
 		r.entities[e.ID()] = rend
 	}
 
@@ -61,20 +92,32 @@ func (r *renderer) RemoveEntity(e entity.Entity) {
 func (r *renderer) Process() {
 
 	for _, ent := range r.entities {
-		gl.UseProgram(ent.Shader.ProgramID())
+		md := ent.Mesh.Data()
+		shader, status := r.assets.Shaders().GetShaderProgram(md.ProgramID)
+		if !status {
+			// if the shader is not loaded there is no point in trying to render it to the screen.
+			continue
+		}
+		gl.UseProgram(md.ProgramID)
 
-		gl.BindVertexArray(ent.Shader.GetVAO())
+		gl.BindVertexArray(md.VAO)
+		// set the camera uniform.  TODO this only needs to be done once per shader
+		projection := r.camera.Projection()
+		gl.UniformMatrix4fv(shader.GetUniformLoc(am.ProjectionUniform), 1, false, &projection[0])
+		// set the view uniform. TODO this only needs to be done once per shader
+		view := r.camera.View()
+		gl.UniformMatrix4fv(shader.GetUniformLoc(am.CameraUniform), 1, false, &view[0])
+
 		td := ent.Transform.Data()
-		gl.UniformMatrix4fv(ent.Shader.GetUniformLoc(components.ModelUniform), 1, false, &td[0])
+		gl.UniformMatrix4fv(shader.GetUniformLoc(am.ModelUniform), 1, false, &td[0])
 		gl.ActiveTexture(gl.TEXTURE0)
-		gl.Uniform1i(ent.Shader.GetUniformLoc(components.TextureUniform), 0)
+		gl.Uniform1i(shader.GetUniformLoc(am.TextureUniform), 0)
 
-		texture, isLoaded := ent.Shader.GetTexture()
+		texture, isLoaded := r.assets.Textures().GetTexture(md.TextureFile)
 		if isLoaded {
 			gl.BindTexture(gl.TEXTURE_2D, texture)
 		}
 
-		md := ent.Mesh.Data()
 		if md.Indexed {
 			gl.DrawElements(gl.TRIANGLE_FAN, int32(len(md.Indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
 		} else {
@@ -85,9 +128,13 @@ func (r *renderer) Process() {
 	}
 }
 
+// LoadCamera sets the camera to be used by the display.
+func (r *renderer) LoadCamera(camera Camera) {
+	r.camera = camera
+}
+
 type renderable struct {
 	Entity    entity.Entity
 	Mesh      components.Mesh
-	Shader    components.Shader
 	Transform components.Transform
 }

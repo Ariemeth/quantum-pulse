@@ -1,7 +1,7 @@
 {
 	"defaultCamera":
 	{
-		"position":[0.0,0.0,5.0],
+		"position":[3.0,3.0,5.0],
 		"lookat":[0.0,0.0,0.0],
 		"up":[0.0,1.0,0.0],
 		"fovy":60.0,
@@ -12,7 +12,7 @@
 	[
 		{
 			"name":"hexagon1",
-			"fileName":"hexagon.json", 
+			"fileName":"hexagon.json",
 			"position":[0.0,0.0,0.0],
 			"rotationalAcceleration":[0.0,0.0,0.0],
 			"translationalAcceleration":[0.0,0.0,0.0],
@@ -21,7 +21,7 @@
 		},
 		{
 			"name":"hexagon2",
-			"fileName":"hexagon.json", 
+			"fileName":"hexagon.json",
 			"position":[2.0,0.0,0.0],
 			"rotationalAcceleration":[0.0,0.0,0.0],
 			"translationalAcceleration":[0.0,0.0,0.0],
@@ -30,7 +30,7 @@
 		},
 		{
 			"name":"hexagon3",
-			"fileName":"hexagon.json", 
+			"fileName":"hexagon.json",
 			"position":[-2.0,0.0,0.0],
 			"rotationalAcceleration":[0.0,0.0,0.0],
 			"translationalAcceleration":[0.0,0.0,0.0],
@@ -39,7 +39,7 @@
 		},
 		{
 			"name":"hexagon4",
-			"fileName":"hexagon.json", 
+			"fileName":"hexagon.json",
 			"position":[1.0,1.5,0.0],
 			"rotationalAcceleration":[0.0,0.0,0.0],
 			"translationalAcceleration":[0.0,0.0,0.0],
@@ -48,7 +48,7 @@
 		},
 		{
 			"name":"hexagon5",
-			"fileName":"hexagon.json", 
+			"fileName":"hexagon.json",
 			"position":[-1.0,1.5,0.0],
 			"rotationalAcceleration":[0.0,0.0,0.0],
 			"translationalAcceleration":[0.0,0.0,0.0],
@@ -57,7 +57,7 @@
 		},
 		{
 			"name":"hexagon6",
-			"fileName":"hexagon.json", 
+			"fileName":"hexagon.json",
 			"position":[1.0,-1.5,0.0],
 			"rotationalAcceleration":[0.0,0.0,0.0],
 			"translationalAcceleration":[0.0,0.0,0.0],
@@ -66,7 +66,7 @@
 		},
 		{
 			"name":"hexagon7",
-			"fileName":"hexagon.json", 
+			"fileName":"hexagon.json",
 			"position":[-1.0,-1.5,0.0],
 			"rotationalAcceleration":[0.0,0.0,0.0],
 			"translationalAcceleration":[0.0,0.0,0.0],
