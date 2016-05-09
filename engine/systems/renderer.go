@@ -62,11 +62,9 @@ func (r *renderer) AddEntity(e entity.Entity) {
 			fmt.Printf("Unable to load shaders %s,%s", md.VertShaderFile, md.FragShaderFile)
 			return
 		}
-		shaderProgram, status := r.assets.Shaders().GetShaderProgram(shader)
-		if status {
-			md.ProgramID = shader
-			md.VAO = shaderProgram.CreateVAO(mesh)
-		}
+
+		md.ProgramID = shader.ProgramID()
+		md.VAO = shader.CreateVAO(mesh)
 
 		// Load and set the texture if it exists.
 		texture, err := r.assets.Textures().LoadTexture(md.TextureFile, md.TextureFile)
