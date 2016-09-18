@@ -36,7 +36,7 @@ func (e *Engine) Init() {
 
 }
 
-// Run is runs the main engine loop
+// Run starts and runs the main engine loop
 func (e *Engine) Run() {
 	defer glfw.Terminate()
 
@@ -61,12 +61,12 @@ func (e *Engine) Run() {
 	}
 }
 
-// AddScene adds a scene into the engine
+// AddScene adds a scene to the engine.
 func (e *Engine) AddScene(scene Scene, name string) {
 	e.scenes[name] = scene
 }
 
-// LoadScene loads a scene
+// LoadScene switches the current scene to the one specificed if it has already been added.
 func (e *Engine) LoadScene(name string) {
 	scene, status := e.scenes[name]
 	if status {
