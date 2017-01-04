@@ -1,9 +1,8 @@
 language: go
-sudo: false
+
 go:
-  - 1.5.4
+  - 1.7.x
   - tip
-env: GOMAXPROCS=2
 addons:
   apt:
     packages:
@@ -11,4 +10,4 @@ addons:
       - xorg-dev
 script:
   - go get -t -v ./...
-  - go test -v 
+  - go test -v
