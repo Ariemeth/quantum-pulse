@@ -50,7 +50,7 @@ func (r *rendererB) RemoveEntity(e entity.Entity) {
 	r.remove <- e
 }
 
-// Start will begin attempting to Render Entities that have been added.  This routine is expected to wait for various channel inputs and act acordingly. The rendererB needs to run on the main thread.
+// Start will begin attempting to Render Entities that have been added.  This routine is expected to wait for various channel inputs and act accordingly. The rendererB needs to run on the main thread.
 func (r *rendererB) Start() {
 	defer r.runningLock.Unlock()
 	r.runningLock.Lock()
