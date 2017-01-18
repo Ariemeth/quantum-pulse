@@ -3,7 +3,7 @@ package systems
 import (
 	"sync"
 
-	"github.com/Ariemeth/quantum-pulse/engine/entity"
+	"github.com/Ariemeth/quantum-pulse/entity"
 )
 
 // RendererB provides the interface needed to process the renderin of Entities.  Each time Process is called all Entities will be rendered.

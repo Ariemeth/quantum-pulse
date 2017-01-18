@@ -4,7 +4,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/Ariemeth/quantum-pulse/engine/components"
+	"github.com/Ariemeth/quantum-pulse/components"
 )
 
 // Entity represents the basic behaviors all engine entities possess.

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	am "github.com/Ariemeth/quantum-pulse/engine/assets"
-	"github.com/Ariemeth/quantum-pulse/engine/components"
-	"github.com/Ariemeth/quantum-pulse/engine/entity"
-	"github.com/Ariemeth/quantum-pulse/engine/systems"
+	am "github.com/Ariemeth/quantum-pulse/assets"
+	"github.com/Ariemeth/quantum-pulse/components"
+	"github.com/Ariemeth/quantum-pulse/entity"
+	"github.com/Ariemeth/quantum-pulse/systems"
 	"github.com/go-gl/mathgl/mgl32"
 )
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	am "github.com/Ariemeth/quantum-pulse/engine/assets"
+	am "github.com/Ariemeth/quantum-pulse/assets"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"

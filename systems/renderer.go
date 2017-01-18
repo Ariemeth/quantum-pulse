@@ -3,9 +3,9 @@ package systems
 import (
 	"fmt"
 
-	am "github.com/Ariemeth/quantum-pulse/engine/assets"
-	"github.com/Ariemeth/quantum-pulse/engine/components"
-	"github.com/Ariemeth/quantum-pulse/engine/entity"
+	am "github.com/Ariemeth/quantum-pulse/assets"
+	"github.com/Ariemeth/quantum-pulse/components"
+	"github.com/Ariemeth/quantum-pulse/entity"
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 

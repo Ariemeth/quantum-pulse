@@ -1,8 +1,8 @@
 package systems
 
 import (
-	"github.com/Ariemeth/quantum-pulse/engine/components"
-	"github.com/Ariemeth/quantum-pulse/engine/entity"
+	"github.com/Ariemeth/quantum-pulse/components"
+	"github.com/Ariemeth/quantum-pulse/entity"
 	"github.com/go-gl/mathgl/mgl32"
 )
 

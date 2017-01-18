@@ -3,7 +3,7 @@ package assets
 import (
 	"fmt"
 
-	"github.com/Ariemeth/quantum-pulse/engine/components"
+	"github.com/Ariemeth/quantum-pulse/components"
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
 

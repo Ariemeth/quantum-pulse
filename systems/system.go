@@ -1,6 +1,6 @@
 package systems
 
-import "github.com/Ariemeth/quantum-pulse/engine/entity"
+import "github.com/Ariemeth/quantum-pulse/entity"
 
 // System represents the behavior all engine systems should implement.
 type System interface {
