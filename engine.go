@@ -1,10 +1,13 @@
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
 	am "github.com/Ariemeth/quantum-pulse/assets"
+
+	"runtime"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
@@ -12,6 +15,8 @@ import (
 
 const windowWidth = 800
 const windowHeight = 600
+
+var mainQueue = make(chan func())
 
 // Engine constitutes the rendering engine which creates and initializes the rendering system.
 type Engine struct {
@@ -21,29 +26,53 @@ type Engine struct {
 	currentScene Scene
 }
 
+func init() {
+	go processMainFuncs()
+}
+
+// processMainFuncs proccess functions that have been added to the mainQueue on the main os thread.
+func processMainFuncs() {
+	runtime.LockOSThread()
+
+	for {
+		f := <-mainQueue
+		f()
+	}
+}
+
+// RunOnMain takes a funcion adds it to a queue that will ensure it is run on the main thread.
+func RunOnMain(f func()) {
+	done := make(chan bool, 1)
+	mainQueue <- func() {
+		f()
+		done <- true
+	}
+	<-done
+}
+
 // Init is called to initialize glfw and opengl
 func (e *Engine) Init() {
-	if err := glfw.Init(); err != nil {
-		log.Fatalln("failed to initialize glfw:", err)
-	}
+	RunOnMain(func() {
+		if err := glfw.Init(); err != nil {
+			log.Fatalln("failed to initialize glfw:", err)
+		}
 
-	e.window = createWindow()
+		e.window = createWindow()
 
-	initGL()
+		initGL()
 
-	e.assets = am.NewAssetManager()
-	e.scenes = make(map[string]Scene)
-
+		e.assets = am.NewAssetManager()
+		e.scenes = make(map[string]Scene)
+	})
 }
 
 // Run starts and runs the main engine loop
 func (e *Engine) Run() {
-	defer glfw.Terminate()
+	defer RunOnMain(func() { glfw.Terminate() })
 
 	previousTime := glfw.GetTime()
 
 	for !e.window.ShouldClose() {
-		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		//Update
 		time := glfw.GetTime()
@@ -52,12 +81,16 @@ func (e *Engine) Run() {
 
 		e.currentScene.Update(elapsed)
 
-		// Render
-		e.currentScene.Render()
+		RunOnMain(func() {
+			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		// Maintenance
-		e.window.SwapBuffers()
-		glfw.PollEvents()
+			// Render
+			e.currentScene.Render()
+
+			// Maintenance
+			e.window.SwapBuffers()
+			glfw.PollEvents()
+		})
 	}
 }
 
@@ -77,10 +110,14 @@ func (e *Engine) LoadScene(name string) {
 // LoadSceneFile loads a scene from a file but does not make it the current scene. You
 // must still call LoadScene with the scene id to load it as the current scene.  LoadSceneFile
 // should not be called before Init is called.
-func (e *Engine) LoadSceneFile(fileName string) string {
-	scene := NewScene(fileName, e.assets)
-	e.AddScene(scene, scene.ID())
-	return scene.ID()
+func (e *Engine) LoadSceneFile(fileName string) (string, error) {
+	var scene Scene
+	RunOnMain(func() { scene = NewScene(fileName, e.assets) })
+	if scene != nil {
+		e.AddScene(scene, scene.ID())
+		return scene.ID(), nil
+	}
+	return "", errors.New("Unable to load scene file")
 }
 
 func createWindow() *glfw.Window {
