@@ -4,13 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
-
-	am "github.com/Ariemeth/quantum-pulse/assets"
-
 	"runtime"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.1/glfw"
+
+	am "github.com/Ariemeth/quantum-pulse/assets"
 )
 
 const windowWidth = 800
