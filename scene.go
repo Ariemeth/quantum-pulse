@@ -39,7 +39,7 @@ type Scene interface {
 func NewScene(fileName string, assets *am.AssetManager) Scene {
 	scene := scene{
 		fileName: fileName,
-		Renderer: systems.NewRenderer(assets),
+		Renderer: systems.NewRenderer(assets, runOnMain),
 		Animator: systems.NewAnimator(),
 		Movement: systems.NewMovement(),
 		assets:   assets,

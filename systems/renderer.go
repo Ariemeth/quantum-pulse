@@ -27,14 +27,16 @@ type renderer struct {
 	entities map[string]renderable
 	assets   *am.AssetManager
 	camera   components.Camera
+	mainFunc func(f func())
 }
 
 // NewRenderer creates a new rendererB system.  The rendererB system handles rendering all renderable Entities to the screen.
-func NewRenderer(assetManager *am.AssetManager) Renderer {
+func NewRenderer(assetManager *am.AssetManager, mainFunc func(f func())) Renderer {
 	r := renderer{
 		entities: make(map[string]renderable),
 		assets:   assetManager,
 		camera:   components.NewCamera(),
+		mainFunc: mainFunc,
 	}
 
 	return &r
@@ -89,41 +91,45 @@ func (r *renderer) RemoveEntity(e entity.Entity) {
 
 func (r *renderer) Process() {
 
-	for _, ent := range r.entities {
-		md := ent.Mesh.Data()
-		shader, status := r.assets.Shaders().GetShaderProgram(md.ProgramID)
-		if !status {
-			// if the shader is not loaded there is no point in trying to render it to the screen.
-			continue
+	r.mainFunc(func() {
+		gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+		for _, ent := range r.entities {
+			md := ent.Mesh.Data()
+			shader, status := r.assets.Shaders().GetShaderProgram(md.ProgramID)
+			if !status {
+				// if the shader is not loaded there is no point in trying to render it to the screen.
+				continue
+			}
+			gl.UseProgram(md.ProgramID)
+
+			gl.BindVertexArray(md.VAO)
+			// set the camera uniform.  TODO this only needs to be done once per shader
+			projection := r.camera.Projection()
+			gl.UniformMatrix4fv(shader.GetUniformLoc(am.ProjectionUniform), 1, false, &projection[0])
+			// set the view uniform. TODO this only needs to be done once per shader
+			view := r.camera.View()
+			gl.UniformMatrix4fv(shader.GetUniformLoc(am.CameraUniform), 1, false, &view[0])
+
+			td := ent.Transform.Data()
+			gl.UniformMatrix4fv(shader.GetUniformLoc(am.ModelUniform), 1, false, &td[0])
+			gl.ActiveTexture(gl.TEXTURE0)
+			gl.Uniform1i(shader.GetUniformLoc(am.TextureUniform), 0)
+
+			texture, isLoaded := r.assets.Textures().GetTexture(md.TextureFile)
+			if isLoaded {
+				gl.BindTexture(gl.TEXTURE_2D, texture)
+			}
+
+			if md.Indexed {
+				gl.DrawElements(gl.TRIANGLE_FAN, int32(len(md.Indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
+			} else {
+				gl.DrawArrays(gl.TRIANGLES, 0, int32(len(md.Verts))/md.VertSize)
+			}
+
+			gl.BindVertexArray(0)
 		}
-		gl.UseProgram(md.ProgramID)
-
-		gl.BindVertexArray(md.VAO)
-		// set the camera uniform.  TODO this only needs to be done once per shader
-		projection := r.camera.Projection()
-		gl.UniformMatrix4fv(shader.GetUniformLoc(am.ProjectionUniform), 1, false, &projection[0])
-		// set the view uniform. TODO this only needs to be done once per shader
-		view := r.camera.View()
-		gl.UniformMatrix4fv(shader.GetUniformLoc(am.CameraUniform), 1, false, &view[0])
-
-		td := ent.Transform.Data()
-		gl.UniformMatrix4fv(shader.GetUniformLoc(am.ModelUniform), 1, false, &td[0])
-		gl.ActiveTexture(gl.TEXTURE0)
-		gl.Uniform1i(shader.GetUniformLoc(am.TextureUniform), 0)
-
-		texture, isLoaded := r.assets.Textures().GetTexture(md.TextureFile)
-		if isLoaded {
-			gl.BindTexture(gl.TEXTURE_2D, texture)
-		}
-
-		if md.Indexed {
-			gl.DrawElements(gl.TRIANGLE_FAN, int32(len(md.Indices)), gl.UNSIGNED_INT, gl.PtrOffset(0))
-		} else {
-			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(md.Verts))/md.VertSize)
-		}
-
-		gl.BindVertexArray(0)
-	}
+	})
 }
 
 // LoadCamera sets the camera to be used by the display.

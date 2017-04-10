@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/glfw/v3.1/glfw"
+	"github.com/go-gl/glfw/v3.2/glfw"
 
 	am "github.com/Ariemeth/quantum-pulse/assets"
 )
@@ -15,7 +15,10 @@ import (
 const windowWidth = 800
 const windowHeight = 600
 
-var mainQueue = make(chan func())
+var (
+	mainQueue = make(chan func())
+	stopQueue = make(chan interface{})
+)
 
 // Engine constitutes the rendering engine which creates and initializes the rendering system.
 type Engine struct {
@@ -34,13 +37,17 @@ func processMainFuncs() {
 	runtime.LockOSThread()
 
 	for {
-		f := <-mainQueue
-		f()
+		select {
+		case f := <-mainQueue:
+			f()
+		case <-stopQueue:
+			return
+		}
 	}
 }
 
-// RunOnMain takes a funcion adds it to a queue that will ensure it is run on the main thread.
-func RunOnMain(f func()) {
+// runOnMain takes a funcion adds it to a queue that will ensure it is run on the main thread.
+func runOnMain(f func()) {
 	done := make(chan bool, 1)
 	mainQueue <- func() {
 		f()
@@ -51,7 +58,7 @@ func RunOnMain(f func()) {
 
 // Init is called to initialize glfw and opengl
 func (e *Engine) Init() {
-	RunOnMain(func() {
+	runOnMain(func() {
 		if err := glfw.Init(); err != nil {
 			log.Fatalln("failed to initialize glfw:", err)
 		}
@@ -67,7 +74,7 @@ func (e *Engine) Init() {
 
 // Run starts and runs the main engine loop
 func (e *Engine) Run() {
-	defer RunOnMain(func() { glfw.Terminate() })
+	defer runOnMain(func() { glfw.Terminate() })
 
 	previousTime := glfw.GetTime()
 
@@ -80,13 +87,10 @@ func (e *Engine) Run() {
 
 		e.currentScene.Update(elapsed)
 
-		RunOnMain(func() {
-			gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+		e.currentScene.Render()
 
-			// Render
-			e.currentScene.Render()
-
-			// Maintenance
+		// Maintenance
+		runOnMain(func() {
 			e.window.SwapBuffers()
 			glfw.PollEvents()
 		})
@@ -111,7 +115,7 @@ func (e *Engine) LoadScene(name string) {
 // should not be called before Init is called.
 func (e *Engine) LoadSceneFile(fileName string) (string, error) {
 	var scene Scene
-	RunOnMain(func() { scene = NewScene(fileName, e.assets) })
+	runOnMain(func() { scene = NewScene(fileName, e.assets) })
 	if scene != nil {
 		e.AddScene(scene, scene.ID())
 		return scene.ID(), nil
@@ -190,6 +194,7 @@ func onMouseButton(window *glfw.Window, b glfw.MouseButton, action glfw.Action, 
 
 func onClose(window *glfw.Window) {
 	window.SetShouldClose(true)
+	stopQueue <- true
 }
 
 func onScroll(window *glfw.Window, xoff float64, yoff float64) {
