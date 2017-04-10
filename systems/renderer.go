@@ -62,17 +62,27 @@ func (r *renderer) AddEntity(e entity.Entity) {
 		}
 		// Set up the shader
 		md := mesh.Data()
-		shader, err := r.assets.Shaders().LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, false)
+
+		var shader am.Shader
+		var err error
+		r.mainFunc(func() {
+			shader, err = r.assets.Shaders().LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, false)
+		})
 		if err != nil {
 			fmt.Printf("Unable to load shaders %s,%s", md.VertShaderFile, md.FragShaderFile)
 			return
 		}
 
-		md.ProgramID = shader.ProgramID()
-		md.VAO = shader.CreateVAO(mesh)
+		r.mainFunc(func() {
+			md.ProgramID = shader.ProgramID()
+			md.VAO = shader.CreateVAO(mesh)
+		})
 
 		// Load and set the texture if it exists.
-		texture, err := r.assets.Textures().LoadTexture(md.TextureFile, md.TextureFile)
+		var texture uint32
+		r.mainFunc(func() {
+			texture, err = r.assets.Textures().LoadTexture(md.TextureFile, md.TextureFile)
+		})
 		if err != nil {
 			fmt.Printf("Unable to load texture:%s", md.TextureFile)
 			return

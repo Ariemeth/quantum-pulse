@@ -109,7 +109,7 @@ func (e *Engine) LoadScene(name string) {
 // should not be called before Init is called.
 func (e *Engine) LoadSceneFile(fileName string) (string, error) {
 	var scene Scene
-	runOnMain(func() { scene = NewScene(fileName, e.assets, e.window) })
+	scene = newScene(fileName, e.assets, e.window)
 	if scene != nil {
 		e.AddScene(scene, scene.ID())
 		return scene.ID(), nil

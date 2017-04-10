@@ -36,8 +36,8 @@ type Scene interface {
 	ID() string
 }
 
-// NewScene creates a new Scene
-func NewScene(fileName string, assets *am.AssetManager, window *glfw.Window) Scene {
+// newScene creates a new Scene
+func newScene(fileName string, assets *am.AssetManager, window *glfw.Window) Scene {
 	scene := scene{
 		fileName: fileName,
 		Renderer: systems.NewRenderer(assets, runOnMain, window),
