@@ -9,6 +9,7 @@ import (
 	"github.com/Ariemeth/quantum-pulse/components"
 	"github.com/Ariemeth/quantum-pulse/entity"
 	"github.com/Ariemeth/quantum-pulse/systems"
+	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 )
 
@@ -36,10 +37,10 @@ type Scene interface {
 }
 
 // NewScene creates a new Scene
-func NewScene(fileName string, assets *am.AssetManager) Scene {
+func NewScene(fileName string, assets *am.AssetManager, window *glfw.Window) Scene {
 	scene := scene{
 		fileName: fileName,
-		Renderer: systems.NewRenderer(assets, runOnMain),
+		Renderer: systems.NewRenderer(assets, runOnMain, window),
 		Animator: systems.NewAnimator(),
 		Movement: systems.NewMovement(),
 		assets:   assets,

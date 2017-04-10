@@ -16,7 +16,7 @@ const windowWidth = 800
 const windowHeight = 600
 
 var (
-	mainQueue = make(chan func())
+	mainQueue = make(chan func(), 15)
 	stopQueue = make(chan interface{})
 )
 
@@ -88,12 +88,6 @@ func (e *Engine) Run() {
 		e.currentScene.Update(elapsed)
 
 		e.currentScene.Render()
-
-		// Maintenance
-		runOnMain(func() {
-			e.window.SwapBuffers()
-			glfw.PollEvents()
-		})
 	}
 }
 
@@ -115,7 +109,7 @@ func (e *Engine) LoadScene(name string) {
 // should not be called before Init is called.
 func (e *Engine) LoadSceneFile(fileName string) (string, error) {
 	var scene Scene
-	runOnMain(func() { scene = NewScene(fileName, e.assets) })
+	runOnMain(func() { scene = NewScene(fileName, e.assets, e.window) })
 	if scene != nil {
 		e.AddScene(scene, scene.ID())
 		return scene.ID(), nil
@@ -194,7 +188,7 @@ func onMouseButton(window *glfw.Window, b glfw.MouseButton, action glfw.Action, 
 
 func onClose(window *glfw.Window) {
 	window.SetShouldClose(true)
-	stopQueue <- true
+	//stopQueue <- true
 }
 
 func onScroll(window *glfw.Window, xoff float64, yoff float64) {

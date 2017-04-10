@@ -7,6 +7,7 @@ import (
 	"github.com/Ariemeth/quantum-pulse/components"
 	"github.com/Ariemeth/quantum-pulse/entity"
 	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
 const (
@@ -28,15 +29,17 @@ type renderer struct {
 	assets   *am.AssetManager
 	camera   components.Camera
 	mainFunc func(f func())
+	window   *glfw.Window
 }
 
 // NewRenderer creates a new rendererB system.  The rendererB system handles rendering all renderable Entities to the screen.
-func NewRenderer(assetManager *am.AssetManager, mainFunc func(f func())) Renderer {
+func NewRenderer(assetManager *am.AssetManager, mainFunc func(f func()), window *glfw.Window) Renderer {
 	r := renderer{
 		entities: make(map[string]renderable),
 		assets:   assetManager,
 		camera:   components.NewCamera(),
 		mainFunc: mainFunc,
+		window:   window,
 	}
 
 	return &r
@@ -129,6 +132,11 @@ func (r *renderer) Process() {
 
 			gl.BindVertexArray(0)
 		}
+
+		// Maintenance
+		r.window.SwapBuffers()
+		glfw.PollEvents()
+
 	})
 }
 
