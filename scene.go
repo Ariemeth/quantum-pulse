@@ -34,6 +34,7 @@ type Scene interface {
 	Render()
 	// ID retrieves the id of this scene.
 	ID() string
+	Stop()
 }
 
 // newScene creates a new Scene
@@ -59,12 +60,16 @@ func (s *scene) ID() string {
 // Update is called to update all scene components.
 func (s *scene) Update(elapsed float64) {
 	//s.Animator.Process(elapsed)
-	s.Movement.Process(elapsed)
+	//	s.Movement.Process(elapsed)
 }
 
 // Render will render each of it Renderable entities.
 func (s *scene) Render() {
-	s.Renderer.Process()
+	//	s.Renderer.Process()
+}
+
+func (s *scene) Stop() {
+	s.Renderer.Stop()
 }
 
 func (s *scene) loadSceneFile(fileName string) {
