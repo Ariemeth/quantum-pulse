@@ -76,58 +76,6 @@ func (r *renderer) RemoveEntity(e entity.Entity) {
 	r.remove <- e
 }
 
-// addEntity adds an Entity to the system.  Each system will have a component requirement that must be met before the Entity can be added.
-func (r *renderer) addEntity(e entity.Entity) {
-	mesh, isMesh := e.Component(components.ComponentTypeMesh).(components.Mesh)
-	transform, isTransform := e.Component(components.ComponentTypeTransform).(components.Transform)
-
-	if isMesh && isTransform {
-		rend := renderable{
-			Mesh:      mesh,
-			Transform: transform,
-		}
-		// Set up the shader
-		md := mesh.Data()
-
-		var shader am.Shader
-		var err error
-		r.mainFunc(func() {
-			shader, err = r.assets.Shaders().LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, false)
-		})
-		if err != nil {
-			fmt.Printf("Unable to load shaders %s,%s", md.VertShaderFile, md.FragShaderFile)
-			return
-		}
-
-		r.mainFunc(func() {
-			md.ProgramID = shader.ProgramID()
-			md.VAO = shader.CreateVAO(mesh)
-		})
-
-		// Load and set the texture if it exists.
-		var texture uint32
-		r.mainFunc(func() {
-			texture, err = r.assets.Textures().LoadTexture(md.TextureFile, md.TextureFile)
-		})
-		if err != nil {
-			fmt.Printf("Unable to load texture:%s", md.TextureFile)
-			return
-		}
-
-		md.TextureID = texture
-		// Add the shader and texture ids to the mesh component.
-		mesh.Set(md)
-
-		r.entities[e.ID()] = rend
-	}
-
-}
-
-// removeEntity removes an Entity from the system.
-func (r *renderer) removeEntity(e entity.Entity) {
-	delete(r.entities, e.ID())
-}
-
 // Start will begin attempting to Render Entities that have been added.  This routine is expected to wait for various channel inputs and act accordingly. The renderer needs to run on the main thread.
 func (r *renderer) Start() {
 	defer r.runningLock.Unlock()
@@ -227,6 +175,57 @@ func (r *renderer) Process() {
 // LoadCamera sets the camera to be used by the display.
 func (r *renderer) LoadCamera(camera components.Camera) {
 	r.camera = camera
+}
+
+// addEntity adds an Entity to the system.  Each system will have a component requirement that must be met before the Entity can be added.
+func (r *renderer) addEntity(e entity.Entity) {
+	mesh, isMesh := e.Component(components.ComponentTypeMesh).(components.Mesh)
+	transform, isTransform := e.Component(components.ComponentTypeTransform).(components.Transform)
+
+	if isMesh && isTransform {
+		rend := renderable{
+			Mesh:      mesh,
+			Transform: transform,
+		}
+		// Set up the shader
+		md := mesh.Data()
+
+		var shader am.Shader
+		var err error
+		r.mainFunc(func() {
+			shader, err = r.assets.Shaders().LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, false)
+		})
+		if err != nil {
+			fmt.Printf("Unable to load shaders %s,%s", md.VertShaderFile, md.FragShaderFile)
+			return
+		}
+
+		r.mainFunc(func() {
+			md.ProgramID = shader.ProgramID()
+			md.VAO = shader.CreateVAO(mesh)
+		})
+
+		// Load and set the texture if it exists.
+		var texture uint32
+		r.mainFunc(func() {
+			texture, err = r.assets.Textures().LoadTexture(md.TextureFile, md.TextureFile)
+		})
+		if err != nil {
+			fmt.Printf("Unable to load texture:%s", md.TextureFile)
+			return
+		}
+
+		md.TextureID = texture
+		// Add the shader and texture ids to the mesh component.
+		mesh.Set(md)
+
+		r.entities[e.ID()] = rend
+	}
+}
+
+// removeEntity removes an Entity from the system.
+func (r *renderer) removeEntity(e entity.Entity) {
+	delete(r.entities, e.ID())
 }
 
 type renderable struct {
