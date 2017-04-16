@@ -28,36 +28,52 @@ type Renderer interface {
 }
 
 type renderer struct {
-	entities     map[string]renderable
-	assets       *am.AssetManager
-	camera       components.Camera
-	mainFunc     func(f func())
-	window       *glfw.Window
-	remove       chan entity.Entity
-	add          chan entity.Entity
-	quit         chan interface{}
-	runningLock  sync.Mutex
-	isRunning    bool
-	requirements []string
-	interval     time.Duration
+	entities       map[string]renderable
+	assets         *am.AssetManager
+	camera         components.Camera
+	mainFunc       func(f func())
+	window         *glfw.Window
+	remove         chan entity.Entity
+	add            chan entity.Entity
+	quit           chan interface{}
+	quitProcessing chan interface{}
+	runningLock    sync.Mutex
+	isRunning      bool
+	requirements   []string
+	interval       time.Duration
 }
 
 // NewRenderer creates a new renderer system.  The renderer system handles rendering all renderable Entities to the screen.
 func NewRenderer(assetManager *am.AssetManager, mainFunc func(f func()), window *glfw.Window) Renderer {
 	r := renderer{
-		entities:     make(map[string]renderable),
-		assets:       assetManager,
-		camera:       components.NewCamera(),
-		mainFunc:     mainFunc,
-		window:       window,
-		remove:       make(chan entity.Entity, 0),
-		add:          make(chan entity.Entity, 0),
-		quit:         make(chan interface{}),
-		requirements: []string{""}, //TODO eventually add the actual requirements
-		interval:     (1000 / 144) * time.Millisecond,
+		entities:       make(map[string]renderable),
+		assets:         assetManager,
+		camera:         components.NewCamera(),
+		mainFunc:       mainFunc,
+		window:         window,
+		remove:         make(chan entity.Entity, 0),
+		add:            make(chan entity.Entity, 0),
+		quit:           make(chan interface{}),
+		quitProcessing: make(chan interface{}),
+		requirements:   []string{""}, //TODO eventually add the actual requirements
+		interval:       (1000 / 144) * time.Millisecond,
 	}
 
-	r.Start()
+	go func() {
+		for {
+			select {
+			case ent := <-r.add:
+				fmt.Printf("Adding %s to the renderer.\n", ent.ID())
+				r.addEntity(ent)
+			case ent := <-r.remove:
+				fmt.Printf("Removing %s to the renderer.\n", ent.ID())
+				r.removeEntity(ent)
+			case <-r.quit:
+				r.isRunning = false
+				return
+			}
+		}
+	}()
 
 	return &r
 }
@@ -77,6 +93,13 @@ func (r *renderer) RemoveEntity(e entity.Entity) {
 	r.remove <- e
 }
 
+// IsRunning is useful to check if the renderer is running its process routine.
+func (r *renderer) IsRunning() bool {
+	defer r.runningLock.Unlock()
+	r.runningLock.Lock()
+	return r.isRunning
+}
+
 // Start will begin attempting to Render Entities that have been added.  This routine is expected to wait for various channel inputs and act accordingly. The renderer needs to run on the main thread.
 func (r *renderer) Start() {
 	defer r.runningLock.Unlock()
@@ -93,18 +116,22 @@ func (r *renderer) Start() {
 
 		for {
 			select {
-			case ent := <-r.add:
-				fmt.Printf("Adding %s to the renderer.\n", ent.ID())
-				r.addEntity(ent)
-			case ent := <-r.remove:
-				fmt.Printf("Removing %s to the renderer.\n", ent.ID())
-				r.removeEntity(ent)
-			case <-r.quit:
+			case <-r.quitProcessing:
 				r.isRunning = false
 				return
 			case <-tr.C:
+				current := time.Now().UnixNano()
+
 				r.Process()
-				tr.Reset(r.interval)
+				processingTime := time.Now().UnixNano() - current
+
+				if processingTime > 0 {
+					processingDuration := time.Duration(processingTime)
+					tr.Reset(r.interval - processingDuration)
+					fmt.Println(processingDuration)
+				} else {
+					tr.Reset(r.interval)
+				}
 			}
 		}
 	}()
@@ -119,11 +146,11 @@ func (r *renderer) Stop() {
 	}
 }
 
-// IsRunning is useful to check if the renderer is running its process routine.
-func (r *renderer) IsRunning() bool {
+func (r *renderer) Terminate() {
 	defer r.runningLock.Unlock()
 	r.runningLock.Lock()
-	return r.isRunning
+	r.quitProcessing <- true
+	r.quit <- true
 }
 
 func (r *renderer) Process() {

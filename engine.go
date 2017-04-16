@@ -81,7 +81,7 @@ func (e *Engine) Run() {
 	for !e.window.ShouldClose() {
 	}
 
-	e.currentScene.Stop()
+	e.currentScene.Terminate()
 }
 
 // AddScene adds a scene to the engine.

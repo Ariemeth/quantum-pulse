@@ -22,28 +22,44 @@ type Movement interface {
 }
 
 type movement struct {
-	entities     map[string]movable
-	remove       chan entity.Entity
-	add          chan entity.Entity
-	quit         chan interface{}
-	runningLock  sync.Mutex
-	isRunning    bool
-	requirements []string
-	interval     time.Duration
+	entities       map[string]movable
+	remove         chan entity.Entity
+	add            chan entity.Entity
+	quit           chan interface{}
+	quitProcessing chan interface{}
+	runningLock    sync.Mutex
+	requirements   []string
+	interval       time.Duration
+	isRunning      bool
 }
 
 // NewMovement creates a new Movement system.
 func NewMovement() Movement {
 	m := movement{
-		entities:     make(map[string]movable, 0),
-		remove:       make(chan entity.Entity, 0),
-		add:          make(chan entity.Entity, 0),
-		quit:         make(chan interface{}),
-		requirements: []string{""}, //TODO eventually add the actual requirements
-		interval:     (1000 / 144) * time.Millisecond,
+		entities:       make(map[string]movable, 0),
+		remove:         make(chan entity.Entity, 0),
+		add:            make(chan entity.Entity, 0),
+		quit:           make(chan interface{}),
+		quitProcessing: make(chan interface{}),
+		requirements:   []string{""}, //TODO eventually add the actual requirements
+		interval:       (1000 / 144) * time.Millisecond,
+		isRunning:      false,
 	}
 
-	m.Start()
+	go func() {
+		for {
+			select {
+			case ent := <-m.add:
+				fmt.Printf("Adding %s to the movement system.\n", ent.ID())
+				m.addEntity(ent)
+			case ent := <-m.remove:
+				fmt.Printf("Removing %s from the movement system.\n", ent.ID())
+				m.removeEntity(ent)
+			case <-m.quit:
+				return
+			}
+		}
+	}()
 
 	return &m
 }
@@ -63,7 +79,14 @@ func (m *movement) RemoveEntity(e entity.Entity) {
 	m.remove <- e
 }
 
-// Start will begin attempting to Render Entities that have been added.  This routine is expected to wait for various channel inputs and act accordingly. The renderer needs to run on the main thread.
+// IsRunning is useful to check if the movement system is processing entities.
+func (m *movement) IsRunning() bool {
+	defer m.runningLock.Unlock()
+	m.runningLock.Lock()
+	return m.isRunning
+}
+
+// Start will begin updating entities transform based on their velocity and acceleration.
 func (m *movement) Start() {
 	defer m.runningLock.Unlock()
 	m.runningLock.Lock()
@@ -71,6 +94,7 @@ func (m *movement) Start() {
 	if m.isRunning {
 		return
 	}
+
 	m.isRunning = true
 
 	go func() {
@@ -80,45 +104,49 @@ func (m *movement) Start() {
 
 		for {
 			select {
-			case ent := <-m.add:
-				fmt.Printf("Adding %s to the movement system.\n", ent.ID())
-				m.addEntity(ent)
-			case ent := <-m.remove:
-				fmt.Printf("Removing %s from the movement system.\n", ent.ID())
-				m.removeEntity(ent)
-			case <-m.quit:
+			case <-m.quitProcessing:
 				m.isRunning = false
 				return
-			case since := <-tr.C:
-				current := since.UnixNano()
+			case <-tr.C:
+				current := time.Now().UnixNano()
 				// Get the elapsed time in seconds
 				elapsed := float32((current - previousTime)) / 1000000000.0
 				previousTime = current
+
 				m.Process(elapsed)
-				tr.Reset(m.interval)
+				processingTime := time.Now().UnixNano() - current
+
+				if processingTime > 0 {
+					processingDuration := time.Duration(processingTime)
+					tr.Reset(m.interval - processingDuration)
+				} else {
+					tr.Reset(m.interval)
+				}
 			}
 		}
 	}()
 }
 
-// Stop Will stop the renderer from rendering any of its Entities.
+// Stop Will stop the movement system from moving any of its Entities.
 func (m *movement) Stop() {
 	defer m.runningLock.Unlock()
 	m.runningLock.Lock()
-	if m.isRunning {
-		m.quit <- true
-	}
+	m.quitProcessing <- true
 }
 
-// IsRunning is useful to check if the renderer is running its process routine.
-func (m *movement) IsRunning() bool {
+// Terminate stops the movement system and releases all resources.  Once Terminate has been called, the system cannot be reused.
+func (m *movement) Terminate() {
 	defer m.runningLock.Unlock()
 	m.runningLock.Lock()
-	return m.isRunning
+	m.quitProcessing <- true
+	m.quit <- true
 }
 
 // Process updates entities position based on their velocities.
 func (m *movement) Process(elapsed float32) {
+	defer m.runningLock.Unlock()
+	m.runningLock.Lock()
+
 	for _, ent := range m.entities {
 		// adjust the velocity based on the acceleration.
 		updateVelocityUsingAcceleration(elapsed, ent.Acceleration, ent.Velocity)
@@ -140,12 +168,17 @@ func (m *movement) addEntity(e entity.Entity) {
 			Acceleration: acceleration,
 			Transform:    transform,
 		}
+		defer m.runningLock.Unlock()
+		m.runningLock.Lock()
 		m.entities[e.ID()] = move
 	}
 }
 
 // removeEntity removes an Entity from the system.
 func (m *movement) removeEntity(e entity.Entity) {
+	defer m.runningLock.Unlock()
+	m.runningLock.Lock()
+
 	delete(m.entities, e.ID())
 }
 

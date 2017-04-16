@@ -38,6 +38,8 @@ type Scene interface {
 	Stop()
 	// Start starts the scene components.
 	Start()
+	// Terminate stops the scene and frees any resources.
+	Terminate()
 }
 
 // newScene creates a new Scene
@@ -78,6 +80,12 @@ func (s *scene) Stop() {
 
 func (s *scene) Start() {
 	s.Renderer.Start()
+	s.Movement.Start()
+}
+
+func (s *scene) Terminate() {
+	s.Renderer.Terminate()
+	s.Movement.Terminate()
 }
 
 func (s *scene) loadSceneFile(fileName string) {
