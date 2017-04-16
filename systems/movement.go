@@ -55,23 +55,12 @@ func (m *movement) SystemType() string {
 
 // AddEntity adds an Entity to the system.  Each system will have a component requirement that must be met before the Entity can be added.
 func (m *movement) AddEntity(e entity.Entity) {
-	velocity, isVelocity := e.Component(components.ComponentTypeVelocity).(components.Velocity)
-	acceleration, isAcceleration := e.Component(components.ComponentTypeAcceleration).(components.Acceleration)
-	transform, isTransform := e.Component(components.ComponentTypeTransform).(components.Transform)
-
-	if isVelocity && isAcceleration && isTransform {
-		move := movable{
-			Velocity:     velocity,
-			Acceleration: acceleration,
-			Transform:    transform,
-		}
-		m.entities[e.ID()] = move
-	}
+	m.add <- e
 }
 
 // RemoveEntity removes an Entity from the system.
 func (m *movement) RemoveEntity(e entity.Entity) {
-	delete(m.entities, e.ID())
+	m.remove <- e
 }
 
 // Start will begin attempting to Render Entities that have been added.  This routine is expected to wait for various channel inputs and act accordingly. The renderer needs to run on the main thread.
@@ -106,7 +95,6 @@ func (m *movement) Start() {
 				elapsed := float32((current - previousTime)) / 1000000000.0
 				previousTime = current
 				m.Process(elapsed)
-				fmt.Printf("Unix interval %f\n", elapsed)
 				tr.Reset(m.interval)
 			}
 		}

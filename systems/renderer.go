@@ -39,6 +39,7 @@ type renderer struct {
 	runningLock  sync.Mutex
 	isRunning    bool
 	requirements []string
+	interval     time.Duration
 }
 
 // NewRenderer creates a new renderer system.  The renderer system handles rendering all renderable Entities to the screen.
@@ -53,6 +54,7 @@ func NewRenderer(assetManager *am.AssetManager, mainFunc func(f func()), window 
 		add:          make(chan entity.Entity, 0),
 		quit:         make(chan interface{}),
 		requirements: []string{""}, //TODO eventually add the actual requirements
+		interval:     (1000 / 144) * time.Millisecond,
 	}
 
 	r.Start()
@@ -86,6 +88,9 @@ func (r *renderer) Start() {
 	r.isRunning = true
 
 	go func() {
+
+		tr := time.NewTimer(r.interval)
+
 		for {
 			select {
 			case ent := <-r.add:
@@ -97,8 +102,9 @@ func (r *renderer) Start() {
 			case <-r.quit:
 				r.isRunning = false
 				return
-			case <-time.After(15 * time.Millisecond): //TODO, see about making this dynamic
+			case <-tr.C:
 				r.Process()
+				tr.Reset(r.interval)
 			}
 		}
 	}()
