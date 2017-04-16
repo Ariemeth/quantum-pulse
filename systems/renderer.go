@@ -142,11 +142,13 @@ func (r *renderer) Start() {
 		for {
 			select {
 			case ent := <-r.add:
-				r.addEntity(ent)
 				fmt.Printf("Adding %s to the renderer.\n", ent.ID())
+				r.addEntity(ent)
 			case ent := <-r.remove:
+				fmt.Printf("Removing %s to the renderer.\n", ent.ID())
 				r.removeEntity(ent)
 			case <-r.quit:
+				r.isRunning = false
 				return
 			case <-time.After(15 * time.Millisecond):
 				r.Process()
@@ -161,7 +163,6 @@ func (r *renderer) Stop() {
 	r.runningLock.Lock()
 	if r.isRunning {
 		r.quit <- true
-		r.isRunning = false
 	}
 }
 
