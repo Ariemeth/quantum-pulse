@@ -11,9 +11,9 @@ type System interface {
 	// RemoveEntity removes an Entity from the system.
 	RemoveEntity(e entity.Entity)
 	// Start causes the system to begin processing all Entities which have been added.
-	//	Start()
+	Start()
 	// Stop stops the system.  Entities are not removed, but the the system will no perform any additional processing until it is started again.
-	//	Stop()
+	Stop()
 	// Used to determine if the system is currently running and processing available Entities.
-	//	IsRunning() bool
+	IsRunning() bool
 }

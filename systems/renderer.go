@@ -25,7 +25,6 @@ type Renderer interface {
 	Process()
 	// LoadCamera sets the camera to be used by the display.
 	LoadCamera(camera components.Camera)
-	Stop()
 }
 
 type renderer struct {
@@ -98,7 +97,7 @@ func (r *renderer) Start() {
 			case <-r.quit:
 				r.isRunning = false
 				return
-			case <-time.After(15 * time.Millisecond):
+			case <-time.After(15 * time.Millisecond): //TODO, see about making this dynamic
 				r.Process()
 			}
 		}

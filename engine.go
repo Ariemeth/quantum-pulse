@@ -76,17 +76,9 @@ func (e *Engine) Init() {
 func (e *Engine) Run() {
 	defer runOnMain(func() { glfw.Terminate() })
 
-	previousTime := glfw.GetTime()
+	e.currentScene.Start()
 
 	for !e.window.ShouldClose() {
-
-		//Update
-		time := glfw.GetTime()
-		elapsed := time - previousTime
-		previousTime = time
-
-		e.currentScene.Update(elapsed)
-
 	}
 
 	e.currentScene.Stop()

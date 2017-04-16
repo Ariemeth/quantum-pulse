@@ -1,16 +1,11 @@
 package systems
 
-import (
-	"github.com/Ariemeth/quantum-pulse/components"
-	"github.com/Ariemeth/quantum-pulse/entity"
-	"github.com/go-gl/mathgl/mgl32"
-)
-
 const (
 	// SystemTypeAnimator is the name of the animator system.
 	SystemTypeAnimator = "animator"
 )
 
+/*
 // Animator defines the behaviors expected of the animation system.
 type Animator interface {
 	System
@@ -28,6 +23,18 @@ func NewAnimator() Animator {
 		entities: make(map[string]animatable, 0),
 	}
 	return &a
+}
+
+func (a *animator) Start() {
+
+}
+
+func (a *animator) Stop() {
+
+}
+
+func (a *animator) IsRunning() bool {
+	return false
 }
 
 // SystemType retrieves the type of system such as renderer, mover, etc.
@@ -74,3 +81,4 @@ type animatable struct {
 	Transform components.Transform
 	animation []func(float64)
 }
+*/

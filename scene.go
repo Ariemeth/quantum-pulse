@@ -20,7 +20,7 @@ const (
 
 type scene struct {
 	Renderer systems.Renderer
-	Animator systems.Animator
+	//	Animator systems.Animator
 	Movement systems.Movement
 	fileName string
 	assets   *am.AssetManager
@@ -34,7 +34,10 @@ type Scene interface {
 	Render()
 	// ID retrieves the id of this scene.
 	ID() string
+	// Stop stops the components of the scene.
 	Stop()
+	// Start starts the scene components.
+	Start()
 }
 
 // newScene creates a new Scene
@@ -42,7 +45,7 @@ func newScene(fileName string, assets *am.AssetManager, window *glfw.Window) Sce
 	scene := scene{
 		fileName: fileName,
 		Renderer: systems.NewRenderer(assets, runOnMain, window),
-		Animator: systems.NewAnimator(),
+		//		Animator: systems.NewAnimator(),
 		Movement: systems.NewMovement(),
 		assets:   assets,
 	}
@@ -60,7 +63,7 @@ func (s *scene) ID() string {
 // Update is called to update all scene components.
 func (s *scene) Update(elapsed float64) {
 	//s.Animator.Process(elapsed)
-	s.Movement.Process(elapsed)
+	//s.Movement.Process(elapsed)
 }
 
 // Render will render each of it Renderable entities.
@@ -70,6 +73,11 @@ func (s *scene) Render() {
 
 func (s *scene) Stop() {
 	s.Renderer.Stop()
+	s.Movement.Stop()
+}
+
+func (s *scene) Start() {
+	s.Renderer.Start()
 }
 
 func (s *scene) loadSceneFile(fileName string) {
