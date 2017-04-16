@@ -60,7 +60,7 @@ func (s *scene) ID() string {
 // Update is called to update all scene components.
 func (s *scene) Update(elapsed float64) {
 	//s.Animator.Process(elapsed)
-	//	s.Movement.Process(elapsed)
+	s.Movement.Process(elapsed)
 }
 
 // Render will render each of it Renderable entities.

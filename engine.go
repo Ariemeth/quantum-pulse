@@ -87,7 +87,6 @@ func (e *Engine) Run() {
 
 		e.currentScene.Update(elapsed)
 
-		//	e.currentScene.Render()
 	}
 	e.currentScene.Stop()
 }

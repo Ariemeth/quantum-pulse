@@ -64,8 +64,7 @@ func (m *movement) Process(elapsed float64) {
 		updateVelocityUsingAcceleration(e, ent.Acceleration, ent.Velocity)
 
 		// Apply velocity matrix to the transform
-		ent.Transform.Translate(ent.Velocity.Translational().Mul(e))
-		ent.Transform.Rotate(ent.Velocity.Rotational().Mul(e))
+		ent.Transform.Update(ent.Velocity.Translational().Mul(e), ent.Velocity.Rotational().Mul(e))
 	}
 }
 
@@ -77,8 +76,7 @@ func updateVelocityUsingAcceleration(elapsed float32, a components.Acceleration,
 	velRot = velRot.Add(accRot.Mul(elapsed))
 	velTrans = velTrans.Add(accTrans.Mul(elapsed))
 
-	v.SetRotational(velRot)
-	v.SetTranslational(velTrans)
+	v.Update(velRot, velTrans)
 }
 
 type movable struct {

@@ -22,6 +22,8 @@ type Velocity interface {
 	SetRotational(mgl32.Vec3)
 	// SetTranslational sets the translational velocity.
 	SetTranslational(mgl32.Vec3)
+	// Update sets the rotational and translational velocities.
+	Update(mgl32.Vec3, mgl32.Vec3)
 }
 
 type velocity struct {
@@ -70,5 +72,13 @@ func (v *velocity) SetRotational(rotate mgl32.Vec3) {
 func (v *velocity) SetTranslational(translate mgl32.Vec3) {
 	v.dataLock.Lock()
 	defer v.dataLock.Unlock()
+	v.translational = translate
+}
+
+// Update sets the rotational and translational velocities.
+func (v *velocity) Update(rotate, translate mgl32.Vec3) {
+	v.dataLock.Lock()
+	defer v.dataLock.Unlock()
+	v.rotational = rotate
 	v.translational = translate
 }
