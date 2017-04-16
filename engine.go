@@ -88,6 +88,7 @@ func (e *Engine) Run() {
 		e.currentScene.Update(elapsed)
 
 	}
+
 	e.currentScene.Stop()
 }
 
@@ -188,7 +189,6 @@ func onMouseButton(window *glfw.Window, b glfw.MouseButton, action glfw.Action, 
 
 func onClose(window *glfw.Window) {
 	window.SetShouldClose(true)
-	//stopQueue <- true
 }
 
 func onScroll(window *glfw.Window, xoff float64, yoff float64) {
