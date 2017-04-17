@@ -4,8 +4,8 @@ import "github.com/Ariemeth/quantum-pulse/entity"
 
 // System represents the behavior all engine systems should implement.
 type System interface {
-	// SystemType retrieves the type of system such as renderer, mover, etc.
-	SystemType() string
+	// Type retrieves the type of system such as renderer, mover, etc.
+	Type() string
 	// AddEntity adds an Entity to the system.  Each system will have a component requirement that must be met before the Entity can be added.
 	AddEntity(e entity.Entity)
 	// RemoveEntity removes an Entity from the system.

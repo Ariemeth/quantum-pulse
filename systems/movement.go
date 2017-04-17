@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	// SystemTypeMovement is the name of the movement system.
-	SystemTypeMovement = "renderer"
+	// TypeMovement is the name of the movement system.
+	TypeMovement = "mover"
 )
 
 // Movement represents a system that knows how to alter an Entity's position based on its velocities.
@@ -66,9 +66,9 @@ func NewMovement() Movement {
 	return &m
 }
 
-// SystemType retrieves the type of system such as renderer, mover, etc.
-func (m *movement) SystemType() string {
-	return SystemTypeMovement
+// Type retrieves the type of system such as renderer, mover, etc.
+func (m *movement) Type() string {
+	return TypeMovement
 }
 
 // AddEntity adds an Entity to the system.  Each system will have a component requirement that must be met before the Entity can be added.

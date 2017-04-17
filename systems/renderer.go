@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	// SystemTypeRenderer is the name of the renderer system.
-	SystemTypeRenderer = "renderer"
+	// TypeRenderer is the name of the renderer system.
+	TypeRenderer = "renderer"
 )
 
 // Renderer provides the interface needed to process the rendering of Entities.  Each time Process is called all Entities will be rendered.
@@ -77,9 +77,9 @@ func NewRenderer(assetManager *am.AssetManager, mainFunc func(f func()), window 
 	return &r
 }
 
-// SystemType retrieves the type of system such as renderer, mover, etc.
-func (r *renderer) SystemType() string {
-	return SystemTypeRenderer
+// Type retrieves the type of system such as renderer, mover, etc.
+func (r *renderer) Type() string {
+	return TypeRenderer
 }
 
 // AddEntity adds an entity to the renderer to be capable of being rendered to the screen.

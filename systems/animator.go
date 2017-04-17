@@ -1,8 +1,8 @@
 package systems
 
 const (
-	// SystemTypeAnimator is the name of the animator system.
-	SystemTypeAnimator = "animator"
+	// TypeAnimator is the name of the animator system.
+	TypeAnimator = "animator"
 )
 
 /*
@@ -37,9 +37,9 @@ func (a *animator) IsRunning() bool {
 	return false
 }
 
-// SystemType retrieves the type of system such as renderer, mover, etc.
-func (a *animator) SystemType() string {
-	return SystemTypeAnimator
+// Type retrieves the type of system such as renderer, mover, etc.
+func (a *animator) Type() string {
+	return TypeAnimator
 }
 
 // AddEntity adds an Entity to the system.  Each system will have a component requirement that must be met before the Entity can be added.
