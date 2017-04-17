@@ -29,10 +29,6 @@ type scene struct {
 
 // Scene represents a logical grouping of entities
 type Scene interface {
-	// Update is called to update all scene components.
-	Update(float64)
-	// Render will render each of it Renderable entities.
-	Render()
 	// ID retrieves the id of this scene.
 	ID() string
 	// Stop stops the components of the scene.
@@ -61,17 +57,6 @@ func newScene(fileName string, assets *am.AssetManager, window *glfw.Window) Sce
 // ID returns the id of the scene which currently is the scene filename used to load the scene.
 func (s *scene) ID() string {
 	return s.fileName
-}
-
-// Update is called to update all scene components.
-func (s *scene) Update(elapsed float64) {
-	//s.Animator.Process(elapsed)
-	//s.Movement.Process(elapsed)
-}
-
-// Render will render each of it Renderable entities.
-func (s *scene) Render() {
-	//	s.Renderer.Process()
 }
 
 func (s *scene) Stop() {
