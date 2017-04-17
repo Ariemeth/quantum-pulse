@@ -128,7 +128,7 @@ func (r *renderer) Start() {
 					processingDuration := time.Duration(processingTime)
 					tr.Reset(r.interval - processingDuration)
 				} else {
-					tr.Reset(r.interval)
+					tr.Reset(time.Nanosecond)
 				}
 			}
 		}
@@ -140,7 +140,7 @@ func (r *renderer) Stop() {
 	defer r.runningLock.Unlock()
 	r.runningLock.Lock()
 	if r.isRunning {
-		r.quit <- true
+		r.quitProcessing <- true
 	}
 }
 
