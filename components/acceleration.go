@@ -22,6 +22,8 @@ type Acceleration interface {
 	SetRotational(mgl32.Vec3)
 	// SetTranslational sets the translational acceleration.
 	SetTranslational(mgl32.Vec3)
+	// Set sets the rotational and translational accerlation vectors.
+	Set(rotational, translational mgl32.Vec3)
 }
 
 type acceleration struct {
@@ -70,4 +72,12 @@ func (a *acceleration) SetTranslational(t mgl32.Vec3) {
 	a.dataLock.Lock()
 	defer a.dataLock.Unlock()
 	a.translational = t
+}
+
+// Set sets both the rotational and translational acceleration.
+func (a *acceleration) Set(rotational, translational mgl32.Vec3) {
+	a.dataLock.Lock()
+	defer a.dataLock.Unlock()
+	a.rotational = rotational
+	a.translational = translational
 }

@@ -192,7 +192,7 @@ func updateVelocityUsingAcceleration(elapsed float32, a components.Acceleration,
 	velRot = velRot.Add(accRot.Mul(elapsed))
 	velTrans = velTrans.Add(accTrans.Mul(elapsed))
 
-	v.Update(velRot, velTrans)
+	v.Set(velRot, velTrans)
 }
 
 type movable struct {

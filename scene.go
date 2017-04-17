@@ -113,7 +113,7 @@ func (s *scene) loadSceneFile(fileName string) {
 	// Load models
 	for _, modelFile := range sd.Models {
 
-		// Load the mesh
+		// Load the mesh component
 		mesh := components.NewMesh()
 		err := mesh.Load(modelFile.FileName)
 		if err != nil {
@@ -121,7 +121,7 @@ func (s *scene) loadSceneFile(fileName string) {
 			continue
 		}
 
-		// Load a transform
+		// Load a transform component
 		t := components.NewTransform()
 		pos := mgl32.Vec3{modelFile.Position[0], modelFile.Position[1], modelFile.Position[2]}
 		t.Translate(pos)
@@ -130,17 +130,22 @@ func (s *scene) loadSceneFile(fileName string) {
 		ent.AddComponent(mesh)
 		ent.AddComponent(t)
 
+		// Load the velocity component
 		vel := components.NewVelocity()
-		// set rotation velocity to rotate around the Y axis at 1 radian per second
 		rotVel := mgl32.Vec3{modelFile.RotVelocity[0], modelFile.RotVelocity[1], modelFile.RotVelocity[2]}
-		vel.SetRotational(rotVel)
+		tranVel := mgl32.Vec3{modelFile.TransVelocity[0], modelFile.TransVelocity[1], modelFile.TransVelocity[2]}
+		vel.Set(rotVel, tranVel)
+
+		// Load the acceleration component
 		accel := components.NewAcceleration()
-		accVel := mgl32.Vec3{modelFile.RotAccel[0], modelFile.RotAccel[1], modelFile.RotAccel[2]}
-		accel.SetRotational(accVel)
+		accRotVel := mgl32.Vec3{modelFile.RotAccel[0], modelFile.RotAccel[1], modelFile.RotAccel[2]}
+		accTranVel := mgl32.Vec3{modelFile.TransAccel[0], modelFile.TransAccel[1], modelFile.TransAccel[2]}
+		accel.Set(accRotVel, accTranVel)
 
 		ent.AddComponent(vel)
 		ent.AddComponent(accel)
 
+		// Add the model to appropriate systems
 		s.Renderer.AddEntity(ent)
 		s.Movement.AddEntity(ent)
 	}
