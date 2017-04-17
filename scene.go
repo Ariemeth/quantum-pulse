@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/mathgl/mgl32"
+
 	am "github.com/Ariemeth/quantum-pulse/assets"
 	"github.com/Ariemeth/quantum-pulse/components"
 	"github.com/Ariemeth/quantum-pulse/entity"
 	"github.com/Ariemeth/quantum-pulse/systems"
-	"github.com/go-gl/glfw/v3.2/glfw"
-	"github.com/go-gl/mathgl/mgl32"
 )
 
 const (

@@ -41,9 +41,11 @@ func NewMovement() Movement {
 		add:            make(chan entity.Entity, 0),
 		quit:           make(chan interface{}),
 		quitProcessing: make(chan interface{}),
-		requirements:   []string{""}, //TODO eventually add the actual requirements
-		interval:       (1000 / 144) * time.Millisecond,
-		isRunning:      false,
+		requirements: []string{components.TypeTransform,
+			components.TypeAcceleration,
+			components.TypeVelocity},
+		interval:  (1000 / 144) * time.Millisecond,
+		isRunning: false,
 	}
 
 	go func() {
@@ -158,9 +160,9 @@ func (m *movement) Process(elapsed float32) {
 
 // addEntity adds an Entity to the system.  Each system will have a component requirement that must be met before the Entity can be added.
 func (m *movement) addEntity(e entity.Entity) {
-	velocity, isVelocity := e.Component(components.ComponentTypeVelocity).(components.Velocity)
-	acceleration, isAcceleration := e.Component(components.ComponentTypeAcceleration).(components.Acceleration)
-	transform, isTransform := e.Component(components.ComponentTypeTransform).(components.Transform)
+	velocity, isVelocity := e.Component(components.TypeVelocity).(components.Velocity)
+	acceleration, isAcceleration := e.Component(components.TypeAcceleration).(components.Acceleration)
+	transform, isTransform := e.Component(components.TypeTransform).(components.Transform)
 
 	if isVelocity && isAcceleration && isTransform {
 		move := movable{

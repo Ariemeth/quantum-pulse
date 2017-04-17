@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	// ComponentTypeTransform represents a transform component's type.
-	ComponentTypeTransform = "transform"
+	// TypeTransform represents a transform component's type.
+	TypeTransform = "transform"
 )
 
 // Transform represents the world position of an entity.
@@ -44,9 +44,9 @@ type transform struct {
 	dataLock    sync.RWMutex
 }
 
-// ComponentType retrieves the type of this component.
-func (t *transform) ComponentType() string {
-	return ComponentTypeTransform
+// Type retrieves the type of this component.
+func (t *transform) Type() string {
+	return TypeTransform
 }
 
 // Set sets the transform to a specific matrix.

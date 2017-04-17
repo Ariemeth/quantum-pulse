@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	// ComponentTypeCamera represents a Camera component's type.
-	ComponentTypeCamera = "Camera"
+	// TypeCamera represents a Camera component's type.
+	TypeCamera = "Camera"
 )
 
 // Camera represents the behaviors of any camera.
@@ -60,9 +60,9 @@ func NewCamera() Camera {
 	return &c
 }
 
-// ComponentType retrieves the type name of this component.
-func (c *camera) ComponentType() string {
-	return ComponentTypeCamera
+// Type retrieves the type name of this component.
+func (c *camera) Type() string {
+	return TypeCamera
 }
 
 // SetView sets the view matrix.

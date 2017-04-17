@@ -47,11 +47,11 @@ func (e *entity) ID() string {
 func (e *entity) AddComponent(c components.Component) error {
 	e.lock.Lock()
 	defer e.lock.Unlock()
-	if _, ok := e.components[c.ComponentType()]; !ok {
-		e.components[c.ComponentType()] = c
+	if _, ok := e.components[c.Type()]; !ok {
+		e.components[c.Type()] = c
 		return nil
 	}
-	return errors.New("Component type already attached.")
+	return errors.New("component type already attached")
 }
 
 // RemoveComponent removes a component from the entity.
@@ -62,18 +62,18 @@ func (e *entity) RemoveComponent(compType string) error {
 		delete(e.components, compType)
 		return nil
 	}
-	return errors.New("Component type not attached.")
+	return errors.New("component type not attached")
 }
 
 // ReplaceComponent replaces an existing component with a new one of the same type.  If the component type has not already been attached returns an error.
 func (e *entity) ReplaceComponent(c components.Component) error {
 	e.lock.Lock()
 	defer e.lock.Unlock()
-	if _, ok := e.components[c.ComponentType()]; ok {
-		e.components[c.ComponentType()] = c
+	if _, ok := e.components[c.Type()]; ok {
+		e.components[c.Type()] = c
 		return nil
 	}
-	return errors.New("Component type not already attached.")
+	return errors.New("component type not already attached")
 }
 
 // Component retrieves a component based on its component type.

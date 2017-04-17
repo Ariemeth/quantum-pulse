@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	// ComponentTypeVelocity represents a velocity component's type.
-	ComponentTypeVelocity = "velocity"
+	// TypeVelocity represents a velocity component's type.
+	TypeVelocity = "velocity"
 )
 
 // Velocity represents the velocity of an entity.
@@ -42,9 +42,9 @@ func NewVelocity() Velocity {
 	return &v
 }
 
-// ComponentType retrieves the type name of this component.
-func (v *velocity) ComponentType() string {
-	return ComponentTypeVelocity
+// Type retrieves the type name of this component.
+func (v *velocity) Type() string {
+	return TypeVelocity
 }
 
 // Rotational retrieves the rotational velocity in radians per second.

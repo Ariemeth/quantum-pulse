@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	// ComponentTypeAcceleration represents an acceleration component's type.
-	ComponentTypeAcceleration = "acceleration"
+	// TypeAcceleration represents an acceleration component's type.
+	TypeAcceleration = "acceleration"
 )
 
 // Acceleration represents the acceleration of an entity.
@@ -39,9 +39,9 @@ func NewAcceleration() Acceleration {
 	return &a
 }
 
-// ComponentType retrieves the type name of this component.
-func (a *acceleration) ComponentType() string {
-	return ComponentTypeAcceleration
+// Type retrieves the type name of this component.
+func (a *acceleration) Type() string {
+	return TypeAcceleration
 }
 
 // Rotational retrieves the rotational acceleration in radians per second.

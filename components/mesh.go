@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	// ComponentTypeMesh represents a mesh component's type.
-	ComponentTypeMesh = "mesh"
+	// TypeMesh represents a mesh component's type.
+	TypeMesh = "mesh"
 	// MeshSrcDir is the expected location of meshes
 	MeshSrcDir = "assets/models/"
 )
@@ -39,9 +39,9 @@ type mesh struct {
 	isLoaded bool
 }
 
-// ComponentType retrieves the type of this component.
-func (m *mesh) ComponentType() string {
-	return ComponentTypeMesh
+// Type retrieves the type of this component.
+func (m *mesh) Type() string {
+	return TypeMesh
 }
 
 // Data retrieves the mesh data from the component.

@@ -3,14 +3,14 @@ package systems
 import (
 	"fmt"
 	"sync"
-
 	"time"
+
+	"github.com/go-gl/gl/v4.1-core/gl"
+	"github.com/go-gl/glfw/v3.2/glfw"
 
 	am "github.com/Ariemeth/quantum-pulse/assets"
 	"github.com/Ariemeth/quantum-pulse/components"
 	"github.com/Ariemeth/quantum-pulse/entity"
-	"github.com/go-gl/gl/v4.1-core/gl"
-	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
 const (
@@ -55,7 +55,7 @@ func NewRenderer(assetManager *am.AssetManager, mainFunc func(f func()), window 
 		add:            make(chan entity.Entity, 0),
 		quit:           make(chan interface{}),
 		quitProcessing: make(chan interface{}),
-		requirements:   []string{""}, //TODO eventually add the actual requirements
+		requirements:   []string{components.TypeTransform, components.TypeMesh},
 		interval:       (1000 / 144) * time.Millisecond,
 	}
 
@@ -63,13 +63,12 @@ func NewRenderer(assetManager *am.AssetManager, mainFunc func(f func()), window 
 		for {
 			select {
 			case ent := <-r.add:
-				fmt.Printf("Adding %s to the renderer.\n", ent.ID())
+				fmt.Printf("Adding %s to the rendering system.\n", ent.ID())
 				r.addEntity(ent)
 			case ent := <-r.remove:
-				fmt.Printf("Removing %s to the renderer.\n", ent.ID())
+				fmt.Printf("Removing %s to the rendering system.\n", ent.ID())
 				r.removeEntity(ent)
 			case <-r.quit:
-				r.isRunning = false
 				return
 			}
 		}
@@ -128,7 +127,6 @@ func (r *renderer) Start() {
 				if processingTime > 0 {
 					processingDuration := time.Duration(processingTime)
 					tr.Reset(r.interval - processingDuration)
-					fmt.Println(processingDuration)
 				} else {
 					tr.Reset(r.interval)
 				}
@@ -211,8 +209,8 @@ func (r *renderer) LoadCamera(camera components.Camera) {
 
 // addEntity adds an Entity to the system.  Each system will have a component requirement that must be met before the Entity can be added.
 func (r *renderer) addEntity(e entity.Entity) {
-	mesh, isMesh := e.Component(components.ComponentTypeMesh).(components.Mesh)
-	transform, isTransform := e.Component(components.ComponentTypeTransform).(components.Transform)
+	mesh, isMesh := e.Component(components.TypeMesh).(components.Mesh)
+	transform, isTransform := e.Component(components.TypeTransform).(components.Transform)
 
 	if isMesh && isTransform {
 		rend := renderable{
