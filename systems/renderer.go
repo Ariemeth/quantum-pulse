@@ -8,9 +8,9 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 
-	am "github.com/Ariemeth/quantum-pulse/assets"
 	"github.com/Ariemeth/quantum-pulse/components"
 	"github.com/Ariemeth/quantum-pulse/entity"
+	am "github.com/Ariemeth/quantum-pulse/resources"
 )
 
 const (
@@ -29,7 +29,7 @@ type Renderer interface {
 
 type renderer struct {
 	entities       map[string]renderable
-	assets         *am.AssetManager
+	assets         *am.Manager
 	camera         components.Camera
 	mainFunc       func(f func())
 	window         *glfw.Window
@@ -44,7 +44,7 @@ type renderer struct {
 }
 
 // NewRenderer creates a new renderer system.  The renderer system handles rendering all renderable Entities to the screen.
-func NewRenderer(assetManager *am.AssetManager, mainFunc func(f func()), window *glfw.Window) Renderer {
+func NewRenderer(assetManager *am.Manager, mainFunc func(f func()), window *glfw.Window) Renderer {
 	r := renderer{
 		entities:       make(map[string]renderable),
 		assets:         assetManager,
