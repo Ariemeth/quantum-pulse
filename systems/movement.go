@@ -122,6 +122,7 @@ func (m *movement) Start() {
 					processingDuration := time.Duration(processingTime)
 					tr.Reset(m.interval - processingDuration)
 				} else {
+					fmt.Println("blah")
 					tr.Reset(time.Nanosecond)
 				}
 			}

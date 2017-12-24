@@ -2,21 +2,22 @@ package main
 
 import (
 	"fmt"
-	qp "github.com/Ariemeth/quantum-pulse"
+
+	"github.com/Ariemeth/quantum-pulse/engine"
 )
 
 func main() {
 
-	engine := new(qp.Engine)
+	e := new(engine.Engine)
 
-	engine.Init()
+	e.Init()
 
-	sceneID, err := engine.LoadSceneFile("scene1.json")
+	sceneID, err := e.LoadSceneFile("scene1.json")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	engine.LoadScene(sceneID)
+	e.LoadScene(sceneID)
 
-	engine.Run()
+	e.Run()
 }
