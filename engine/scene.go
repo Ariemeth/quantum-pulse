@@ -10,7 +10,7 @@ import (
 
 	"github.com/Ariemeth/quantum-pulse/components"
 	"github.com/Ariemeth/quantum-pulse/entity"
-	am "github.com/Ariemeth/quantum-pulse/resources"
+	"github.com/Ariemeth/quantum-pulse/resources"
 	"github.com/Ariemeth/quantum-pulse/systems"
 )
 
@@ -24,7 +24,7 @@ type scene struct {
 	//	Animator systems.Animator
 	Movement systems.Movement
 	fileName string
-	assets   *am.Manager
+	assets   *resources.Manager
 }
 
 // Scene represents a logical grouping of entities
@@ -40,7 +40,7 @@ type Scene interface {
 }
 
 // newScene creates a new Scene
-func newScene(fileName string, assets *am.Manager, window *glfw.Window) Scene {
+func newScene(fileName string, assets *resources.Manager, window *glfw.Window) Scene {
 	scene := scene{
 		fileName: fileName,
 		Renderer: systems.NewRenderer(assets, runOnMain, window),

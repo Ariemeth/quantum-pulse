@@ -9,7 +9,7 @@ import (
 	"github.com/go-gl/gl/v4.1-core/gl"
 	"github.com/go-gl/glfw/v3.2/glfw"
 
-	am "github.com/Ariemeth/quantum-pulse/resources"
+	"github.com/Ariemeth/quantum-pulse/resources"
 )
 
 const windowWidth = 800
@@ -23,7 +23,7 @@ var (
 // Engine constitutes the rendering engine which creates and initializes the rendering system.
 type Engine struct {
 	window       *glfw.Window
-	assets       *am.Manager
+	assets       *resources.Manager
 	scenes       map[string]Scene
 	currentScene Scene
 }
@@ -67,7 +67,7 @@ func (e *Engine) Init() {
 
 		initGL()
 
-		e.assets = am.NewManager()
+		e.assets = resources.NewManager()
 		e.scenes = make(map[string]Scene)
 	})
 }
