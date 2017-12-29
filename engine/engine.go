@@ -12,9 +12,6 @@ import (
 	"github.com/Ariemeth/quantum-pulse/resources"
 )
 
-const windowWidth = 800
-const windowHeight = 600
-
 var (
 	mainQueue = make(chan func(), 15)
 	stopQueue = make(chan interface{})
@@ -22,10 +19,12 @@ var (
 
 // Engine constitutes the rendering engine which creates and initializes the rendering system.
 type Engine struct {
-	window       *glfw.Window
 	assets       *resources.Manager
-	scenes       map[string]Scene
 	currentScene Scene
+	scenes       map[string]Scene
+	window       *glfw.Window
+	windowWidth  int
+	windowHeight int
 }
 
 func init() {
@@ -57,13 +56,14 @@ func runOnMain(f func()) {
 }
 
 // Init is called to initialize glfw and opengl
-func (e *Engine) Init() {
+func (e *Engine) Init(width, height int, title string) {
 	runOnMain(func() {
 		if err := glfw.Init(); err != nil {
 			log.Fatalln("failed to initialize glfw:", err)
 		}
-
-		e.window = createWindow()
+		e.windowWidth = width
+		e.windowHeight = height
+		e.window = createWindow(width, height, title)
 
 		initGL()
 
@@ -105,7 +105,7 @@ func (e *Engine) LoadScene(name string) {
 // should not be called before Init is called.
 func (e *Engine) LoadSceneFile(fileName string) (string, error) {
 	var scene Scene
-	scene = newScene(fileName, e.assets, e.window)
+	scene = newScene(fileName, e.assets, e.window,e.windowWidth,e.windowHeight)
 	if scene != nil {
 		e.AddScene(scene, scene.ID())
 		return scene.ID(), nil
@@ -113,14 +113,14 @@ func (e *Engine) LoadSceneFile(fileName string) (string, error) {
 	return "", errors.New("Unable to load scene file")
 }
 
-func createWindow() *glfw.Window {
+func createWindow(width, height int, title string) *glfw.Window {
 	glfw.WindowHint(glfw.Resizable, glfw.False)
 	glfw.WindowHint(glfw.ContextVersionMajor, 4)
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
 
-	window, err := glfw.CreateWindow(windowWidth, windowHeight, "Frame Assault", nil, nil)
+	window, err := glfw.CreateWindow(width, height, title, nil, nil)
 	if err != nil {
 		panic(err)
 	}

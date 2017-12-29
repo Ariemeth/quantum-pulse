@@ -40,7 +40,7 @@ type Scene interface {
 }
 
 // newScene creates a new Scene
-func newScene(fileName string, assets *resources.Manager, window *glfw.Window) Scene {
+func newScene(fileName string, assets *resources.Manager, window *glfw.Window,width, height int) Scene {
 	scene := scene{
 		fileName: fileName,
 		Renderer: systems.NewRenderer(assets, runOnMain, window),
@@ -49,7 +49,7 @@ func newScene(fileName string, assets *resources.Manager, window *glfw.Window) S
 		assets:   assets,
 	}
 
-	scene.loadSceneFile(fileName)
+	scene.loadSceneFile(fileName,width,height)
 
 	return &scene
 }
@@ -74,7 +74,7 @@ func (s *scene) Terminate() {
 	s.Movement.Terminate()
 }
 
-func (s *scene) loadSceneFile(fileName string) {
+func (s *scene) loadSceneFile(fileName string,width, height int) {
 
 	data, err := ioutil.ReadFile(fmt.Sprintf("%s%s", SceneSrcDir, fileName))
 	if err != nil {
@@ -92,7 +92,7 @@ func (s *scene) loadSceneFile(fileName string) {
 	// configure the camera
 	cam := components.NewCamera()
 	cam.SetView(sd.Camera.Position, sd.Camera.LookAt, sd.Camera.Up)
-	cam.SetProjection(sd.Camera.FOVY, sd.Camera.NearPlane, sd.Camera.FarPlane, windowWidth, windowHeight)
+	cam.SetProjection(sd.Camera.FOVY, sd.Camera.NearPlane, sd.Camera.FarPlane, width, height)
 	s.Renderer.LoadCamera(cam)
 
 	// Load models
