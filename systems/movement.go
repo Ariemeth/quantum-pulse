@@ -119,10 +119,8 @@ func (m *movement) Start() {
 				processingTime := time.Now().UnixNano() - current
 
 				if processingTime > 0 {
-					processingDuration := time.Duration(processingTime)
-					tr.Reset(m.interval - processingDuration)
+					tr.Reset(m.interval - time.Duration(processingTime))
 				} else {
-					fmt.Println("blah")
 					tr.Reset(time.Nanosecond)
 				}
 			}

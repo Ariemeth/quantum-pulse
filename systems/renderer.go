@@ -125,8 +125,7 @@ func (r *renderer) Start() {
 				processingTime := time.Now().UnixNano() - current
 
 				if processingTime > 0 {
-					processingDuration := time.Duration(processingTime)
-					tr.Reset(r.interval - processingDuration)
+					tr.Reset(r.interval - time.Duration(processingTime))
 				} else {
 					tr.Reset(time.Nanosecond)
 				}
