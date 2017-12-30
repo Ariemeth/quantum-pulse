@@ -1,7 +1,7 @@
 package systems
 
 import (
-	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -63,10 +63,10 @@ func NewRenderer(assetManager *am.Manager, mainFunc func(f func()), window *glfw
 		for {
 			select {
 			case ent := <-r.add:
-				fmt.Printf("Adding %s to the rendering system.\n", ent.ID())
+				log.Printf("Adding %s to the rendering system.\n", ent.ID())
 				r.addEntity(ent)
 			case ent := <-r.remove:
-				fmt.Printf("Removing %s to the rendering system.\n", ent.ID())
+				log.Printf("Removing %s to the rendering system.\n", ent.ID())
 				r.removeEntity(ent)
 			case <-r.quit:
 				return
@@ -160,14 +160,14 @@ func (r *renderer) Process() {
 
 		for _, ent := range r.entities {
 			md := ent.Mesh.Data()
-			shader, status := r.assets.Shaders().GetShaderProgram(md.ProgramID)
+			shader, status := r.assets.Shaders().GetShaderProgram(ent.ProgramID)
 			if !status {
 				// if the shader is not loaded there is no point in trying to render it to the screen.
 				continue
 			}
-			gl.UseProgram(md.ProgramID)
+			gl.UseProgram(ent.ProgramID)
 
-			gl.BindVertexArray(md.VAO)
+			gl.BindVertexArray(ent.VAO)
 			// set the camera uniform.  TODO this only needs to be done once per shader
 			projection := r.camera.Projection()
 			gl.UniformMatrix4fv(shader.GetUniformLoc(am.ProjectionUniform), 1, false, &projection[0])
@@ -211,43 +211,47 @@ func (r *renderer) addEntity(e entity.Entity) {
 	mesh, isMesh := e.Component(components.TypeMesh).(components.Mesh)
 	transform, isTransform := e.Component(components.TypeTransform).(components.Transform)
 
-	if isMesh && isTransform {
-		rend := renderable{
-			Mesh:      mesh,
-			Transform: transform,
-		}
-		// Set up the shader
-		md := mesh.Data()
+	if !isMesh || !isTransform {
+		log.Printf("cannot load entity %s as a renderable", e.ID())
+		return
+	}
 
-		var shader am.Shader
-		var err error
-		r.mainFunc(func() {
-			shader, err = r.assets.Shaders().LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, false)
-		})
+	rend := renderable{
+		Mesh:      mesh,
+		Transform: transform,
+	}
+	// Set up the shader
+	md := mesh.Data()
+
+	done := make(chan bool, 1)
+
+	r.mainFunc(func() {
+		shader, err := r.assets.Shaders().LoadProgramFromFile(md.VertShaderFile, md.FragShaderFile, false)
+
 		if err != nil {
-			fmt.Printf("Unable to load shaders %s,%s", md.VertShaderFile, md.FragShaderFile)
+			log.Printf("Unable to load shaders %s,%s", md.VertShaderFile, md.FragShaderFile)
+			done <- false
 			return
 		}
 
-		r.mainFunc(func() {
-			md.ProgramID = shader.ProgramID()
-			md.VAO = shader.CreateVAO(mesh)
-		})
+		rend.ProgramID = shader.ProgramID()
+		rend.VAO = shader.CreateVAO(mesh)
 
 		// Load and set the texture if it exists.
-		var texture uint32
-		r.mainFunc(func() {
-			texture, err = r.assets.Textures().LoadTexture(md.TextureFile, md.TextureFile)
-		})
-		if err != nil {
-			fmt.Printf("Unable to load texture:%s", md.TextureFile)
-			return
+		if md.TextureFile != "" {
+			texture, err := r.assets.Textures().LoadTexture(md.TextureFile, md.TextureFile)
+			if err != nil {
+				log.Printf("Unable to load texture:%s", md.TextureFile)
+				done <- false
+				return
+			}
+
+			rend.TextureID = texture
 		}
-
-		md.TextureID = texture
-		// Add the shader and texture ids to the mesh component.
-		mesh.Set(md)
-
+		done <- true
+	})
+	// Add the shader and texture ids to the mesh component.
+	if <-done {
 		r.entities[e.ID()] = rend
 	}
 }
@@ -261,4 +265,7 @@ type renderable struct {
 	Entity    entity.Entity
 	Mesh      components.Mesh
 	Transform components.Transform
+	VAO       uint32
+	ProgramID uint32
+	TextureID uint32
 }
