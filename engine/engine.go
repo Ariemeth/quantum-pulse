@@ -30,7 +30,7 @@ func init() {
 	go processMainFuncs()
 }
 
-// processMainFuncs proccess functions that have been added to the mainQueue on the main os thread.
+// processMainFuncs process functions that have been added to the mainQueue on the main os thread.
 func processMainFuncs() {
 	runtime.LockOSThread()
 
