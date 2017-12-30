@@ -40,7 +40,7 @@ type Scene interface {
 }
 
 // newScene creates a new Scene
-func newScene(fileName string, assets *resources.Manager, window *glfw.Window,width, height int) Scene {
+func newScene(fileName string, assets *resources.Manager, window *glfw.Window, width, height int) (*scene, error) {
 	scene := scene{
 		fileName: fileName,
 		Renderer: systems.NewRenderer(assets, runOnMain, window),
@@ -49,9 +49,12 @@ func newScene(fileName string, assets *resources.Manager, window *glfw.Window,wi
 		assets:   assets,
 	}
 
-	scene.loadSceneFile(fileName,width,height)
+	err := scene.loadSceneFile(fileName, width, height)
+	if err != nil {
+		return nil, err
+	}
 
-	return &scene
+	return &scene, nil
 }
 
 // ID returns the id of the scene which currently is the scene filename used to load the scene.
@@ -74,19 +77,17 @@ func (s *scene) Terminate() {
 	s.Movement.Terminate()
 }
 
-func (s *scene) loadSceneFile(fileName string,width, height int) {
+func (s *scene) loadSceneFile(fileName string, width, height int) error {
 
 	data, err := ioutil.ReadFile(fmt.Sprintf("%s%s", SceneSrcDir, fileName))
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		return err
 	}
 
 	var sd sceneData
 	err = json.Unmarshal(data, &sd)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
 
 	// configure the camera
@@ -134,7 +135,7 @@ func (s *scene) loadSceneFile(fileName string,width, height int) {
 		s.Renderer.AddEntity(ent)
 		s.Movement.AddEntity(ent)
 	}
-
+	return nil
 }
 
 type sceneData struct {

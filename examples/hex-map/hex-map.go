@@ -16,7 +16,10 @@ func main() {
 
 	e := engine.Engine{}
 
-	e.Init(screenWidth, screenHeight, windowTitle)
+	err := e.Init(screenWidth, screenHeight, windowTitle)
+	if err != nil {
+		panic(err)
+	}
 
 	sceneID, err := e.LoadSceneFile("scene1.json")
 	if err != nil {
